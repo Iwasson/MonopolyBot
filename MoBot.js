@@ -8,6 +8,7 @@ client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 
     client.user.setActivity("Monopoly")
+    client.user.setAvatar("https://banner2.cleanpng.com/20180614/lsj/kisspng-rich-uncle-pennybags-monopoly-party-game-monopoly-monopoly-man-5b22af6d28f393.9150592815289997891678.jpg")
 
     /*
     client.guilds.forEach((guild) => {
@@ -85,7 +86,8 @@ async function imgCommand(arguments, receivedMessage) {
     */
     const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
-	ctx.drawImage(avatar, 615.384615, 25, 50, 50);
+    //871.1538459 is the bottom row
+	ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
 
     const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
     receivedMessage.reply(attachment);
