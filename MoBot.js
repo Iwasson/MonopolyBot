@@ -43,8 +43,11 @@ function processCommand(receivedMessage) {
     else if(primaryCommand == "init") {
         initCommand(arguments, receivedMessage)
     }
-    else if(primaryCommand == "img"){
+    else if(primaryCommand == "img") {
         imgCommand(arguments, receivedMessage)
+    }
+    else if(primaryCommand == "roll") {
+        rollCommand(arguments, receivedMessage)
     }
 }
 
@@ -62,6 +65,23 @@ function initCommand(arguments, receivedMessage) {
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
 }
+
+function rollCommand(arguments, receivedMessage) {
+    let generalChannel = client.channels.get("664325321876832258")
+    var die1 = getRandomInt(1, 7)
+    var die2 = getRandomInt(1, 7)
+
+    var result = die1 + die2
+    generalChannel.send("You Rolled: " + die1 + " and " + die2 + " for a total of: " + result)
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  }
+
+
 //Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
 async function imgCommand(arguments, receivedMessage) {
     const canvas = Canvas.createCanvas(1000, 1000);
