@@ -75,8 +75,17 @@ async function imgCommand(arguments, receivedMessage) {
 	//ctx.font = '28px sans-serif';
 	//ctx.fillStyle = '#ffffff';
     //ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 3.5);
+    //================================================================================
+    /*
+    ToDo:
+        Add monopoly pieces to the board
+        Function to make them move x amount of places
+            Need to have pre mapped out spaces beacause of the big squares on the corners, cannot move a uniform amount
+            Each player needs to be the same size.
+    */
     const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
-	ctx.drawImage(avatar, 25, 25, 200, 200);
+    //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
+	ctx.drawImage(avatar, 615.384615, 25, 50, 50);
 
     const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
     receivedMessage.reply(attachment);
