@@ -56,5 +56,9 @@ function initCommand(arguments, receivedMessage) {
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
 }
+//Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
+async function imgCommand(arguments, receivedMessage) {
+
+}
 
 client.login(auth.token)
