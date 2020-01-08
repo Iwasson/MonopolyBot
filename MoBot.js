@@ -1,4 +1,5 @@
 const Discord = require('discord.js')
+const auth = require('./auth.json')
 const client = new Discord.Client()
 
 client.on('ready', () => {
@@ -59,5 +60,4 @@ function initCommand(arguments, receivedMessage) {
     generalChannel.send(attachment)
 }
 
-client.login("NjY0MzI1MTM1MDI0NzgzNDAz.XhVbWg.qd6Duk-BvzCjMYTni5N-n8t4nt8")
-
+client.login(auth.token)
