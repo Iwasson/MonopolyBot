@@ -1,6 +1,8 @@
 const Discord = require('discord.js')
 const auth = require('./auth.json')
 const client = new Discord.Client()
+const Canvas = require('canvas')
+const {createCanvas, loadImage} = require('canvas')
 
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
@@ -40,6 +42,9 @@ function processCommand(receivedMessage) {
     else if(primaryCommand == "init") {
         initCommand(arguments, receivedMessage)
     }
+    else if(primaryCommand == "img"){
+        imgCommand(arguments, receivedMessage)
+    }
 }
 
 function helpCommand(arguments, receivedMessage) {
@@ -58,6 +63,23 @@ function initCommand(arguments, receivedMessage) {
 }
 //Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
 async function imgCommand(arguments, receivedMessage) {
+    const canvas = Canvas.createCanvas(1000, 1000);
+	const ctx = canvas.getContext('2d');
+	const background = await Canvas.loadImage('https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
+	ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+	ctx.strokeStyle = '#74037b';
+	ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    //used to print text.. not needed right now
+	// Slightly smaller text placed above the member's display name
+	//ctx.font = '28px sans-serif';
+	//ctx.fillStyle = '#ffffff';
+    //ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 3.5);
+    const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
+	ctx.drawImage(avatar, 25, 25, 200, 200);
+
+    const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
+    receivedMessage.reply(attachment);
 
 }
 
