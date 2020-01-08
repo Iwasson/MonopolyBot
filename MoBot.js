@@ -16,9 +16,6 @@ client.on('ready', () => {
         //General Channel id: 664325321876832258
     })
     */
-
-    
-
     
 })
 
