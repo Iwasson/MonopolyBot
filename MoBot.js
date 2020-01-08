@@ -8,7 +8,7 @@ client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 
     client.user.setActivity("Monopoly")
-    client.user.setAvatar("https://banner2.cleanpng.com/20180614/lsj/kisspng-rich-uncle-pennybags-monopoly-party-game-monopoly-monopoly-man-5b22af6d28f393.9150592815289997891678.jpg")
+    client.user.setAvatar("https://banner2.cleanpng.com/20180614/lsj/kisspng-rich-uncle-pennybags-monopoly-party-game-monopoly-monopoly-man-5b22af6d28f393.9150592815289997891678.jpg").catch
 
     /*
     client.guilds.forEach((guild) => {
@@ -37,27 +37,54 @@ function processCommand(receivedMessage) {
     let primaryCommand = splitCommand[0]                //sets the primary command
     let arguments = splitCommand.slice(1)               //sets an array of arguments
 
-    if(primaryCommand == "help") {
+    if(primaryCommand == "help" || primaryCommand == "Help") {
         helpCommand(arguments, receivedMessage)
     }
-    else if(primaryCommand == "init") {
+    else if(primaryCommand == "Start" || primaryCommand == "start") {
+        startCommand(arguments, receivedMessage)
+    }
+    else if(primaryCommand == "init" || primaryCommand == "Init") {
         initCommand(arguments, receivedMessage)
     }
-    else if(primaryCommand == "img") {
+    else if(primaryCommand == "img" || primaryCommand == "Img") {
         imgCommand(arguments, receivedMessage)
     }
-    else if(primaryCommand == "roll") {
+    else if(primaryCommand == "roll" || primaryCommand == "Roll") {
         rollCommand(arguments, receivedMessage)
     }
 }
 
 function helpCommand(arguments, receivedMessage) {
     if(arguments.length == 0) {
-        receivedMessage.channel.send("Helping you...?")
+        receivedMessage.channel.send("List of Commands: ")
+        receivedMessage.channel.send("Init")
+        receivedMessage.channel.send("Start")
+        receivedMessage.channel.send("Roll")
     }
     else {
-        receivedMessage.channel.send("Need help with " + arguments)
+        if(arguments.length == 1) {
+            if(arguments[0] == "Init" || arguments[0] == "init") {
+                receivedMessage.channel.send("Initializes the bot for a new game of Monopoly!")
+            }
+            else if(arguments[0] == "Start" || arguments[0] == "start") {
+                receivedMessage.channel.send("Starts a new game of Monopoly!")
+            }
+            else if(arguments[0] == "Roll" || arguments[0] == "roll") {
+                receivedMessage.channel.send("Roll your two die")
+            }
+            else {
+                receivedMessage.channel.send("Sorry thats not a command I can help you with...")
+            }
+        }
+        else {
+            receivedMessage.channel.send("Sorry I can only help with one command at a time, please try again.")
+        }
     }
+}
+
+function startCommand(arguments, receivedMessage) {
+    let generalChannel = client.channels.get("664325321876832258")
+    generalChannel.send("Bitch im not ready yet")
 }
 
 function initCommand(arguments, receivedMessage) {
