@@ -3,12 +3,12 @@ const auth = require('./auth.json')
 const client = new Discord.Client()
 const Canvas = require('canvas')
 const {createCanvas, loadImage} = require('canvas')
-
+const Roll = require('./roll.js')
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 
     client.user.setActivity("Monopoly")
-    client.user.setAvatar("https://banner2.cleanpng.com/20180614/lsj/kisspng-rich-uncle-pennybags-monopoly-party-game-monopoly-monopoly-man-5b22af6d28f393.9150592815289997891678.jpg").catch
+    //client.user.setAvatar("https://banner2.cleanpng.com/20180614/lsj/kisspng-rich-uncle-pennybags-monopoly-party-game-monopoly-monopoly-man-5b22af6d28f393.9150592815289997891678.jpg").catch
 
     /*
     client.guilds.forEach((guild) => {
@@ -37,7 +37,9 @@ function processCommand(receivedMessage) {
     let primaryCommand = splitCommand[0]                //sets the primary command
     let arguments = splitCommand.slice(1)               //sets an array of arguments
     var result = 0;
-
+    var counter =0;
+    let generalChannel = client.channels.get("664325321876832258")
+    
     if(primaryCommand == "help" || primaryCommand == "Help") {
         helpCommand(arguments, receivedMessage)
     }
@@ -51,7 +53,7 @@ function processCommand(receivedMessage) {
         imgCommand(arguments, receivedMessage)
     }
     else if(primaryCommand == "roll" || primaryCommand == "Roll") {
-        rollCommand(arguments, receivedMessage, result)
+        Roll.rollCommand(arguments, receivedMessage, result, counter, generalChannel)
     }
 }
 
@@ -93,8 +95,8 @@ function initCommand(arguments, receivedMessage) {
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
 }
-
-function rollCommand(arguments, receivedMessage, result) {
+/*
+function rollCommand(arguments, receivedMessage, result, counter) {
     let generalChannel = client.channels.get("664325321876832258")
     var die1 = getRandomInt(1, 7)
     var die2 = getRandomInt(1, 7)
@@ -102,8 +104,15 @@ function rollCommand(arguments, receivedMessage, result) {
     result += die1 + die2
     generalChannel.send("You Rolled: " + die1 + " and " + die2 + " for a total of: " + result)
     if (die1 == die2){
-        generalChannel.send("Doubles! Rolling again!");
-        rollCommand(arguments, receivedMessage, result)
+        if(counter >=3){
+            generalChannel.send("That is three doubles in a row... Go to jail.")
+            //Put in go to jail call here
+        }
+        else{
+            generalChannel.send("Doubles! Rolling again...");
+            ++counter;
+            rollCommand(arguments, receivedMessage, result, counter)
+        }
     }
 }
 
@@ -112,7 +121,7 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
   }
-
+*/
 
 //Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
 async function imgCommand(arguments, receivedMessage) {
