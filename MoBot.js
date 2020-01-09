@@ -4,6 +4,15 @@ const client = new Discord.Client()
 const Canvas = require('canvas')
 const {createCanvas, loadImage} = require('canvas')
 const Roll = require('./roll.js')
+//define struct
+function player(playerID, money, property) {
+    this.playerID = playerID;
+    this.money = money;
+    this.property = property;
+}
+//hold the players for game
+var players = []
+var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 
@@ -17,6 +26,7 @@ client.on('ready', () => {
             console.log(` - ${channel.name} ${channel.type} ${channel.id}`)
         })
         //General Channel id: 664325321876832258
+        //could also just right click on channel in discord and get id that way
     })
     */
     
@@ -94,7 +104,28 @@ function initCommand(arguments, receivedMessage) {
     let generalChannel = client.channels.get("664325321876832258")
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
+    var playerIn = false
+    if (players.length > 0)
+    {
+      for (player in players){
+           if (this.playerID == receivedMessage.author.id){
+                generalChannel.send("Error player already added")
+                playerIn = true
+         }
+       }
+       if(!Boolean(playerIn)){
+        players.push(new player(receivedMessage.author.id, 1000, null))
+        generalChannel.send(JSON.stringify(players));
+        playerCheck.push(receivedMessage.author.id)
+       }
+    }
+    else {
+        players.push(new player(receivedMessage.author.id, 1000, null))
+        generalChannel.send(JSON.stringify(players));
+        playerCheck.push(receivedMessage.author.id)
+     }
 }
+
 /*
 function rollCommand(arguments, receivedMessage, result, counter) {
     let generalChannel = client.channels.get("664325321876832258")
