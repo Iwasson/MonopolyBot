@@ -9,17 +9,6 @@ client.on('ready', () => {
 
     client.user.setActivity("Monopoly")
     //client.user.setAvatar("https://banner2.cleanpng.com/20180614/lsj/kisspng-rich-uncle-pennybags-monopoly-party-game-monopoly-monopoly-man-5b22af6d28f393.9150592815289997891678.jpg").catch
-
-    /*
-    client.guilds.forEach((guild) => {
-        console.log(guild.name)
-        guild.channels.forEach((channel) => {
-            console.log(` - ${channel.name} ${channel.type} ${channel.id}`)
-        })
-        //General Channel id: 664325321876832258
-    })
-    */
-    
 })
 
 //Listens for commands from the user
@@ -127,7 +116,7 @@ function getRandomInt(min, max) {
 async function imgCommand(arguments, receivedMessage) {
     const canvas = Canvas.createCanvas(1000, 1000);
 	const ctx = canvas.getContext('2d');
-	const background = await Canvas.loadImage('https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
+	const background = await Canvas.loadImage('./assets/Board.jpg');
 	ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 	ctx.strokeStyle = '#74037b';
@@ -152,7 +141,7 @@ async function imgCommand(arguments, receivedMessage) {
 
     const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
     receivedMessage.reply(attachment);
-
+    
 }
 
 client.login(auth.token)
