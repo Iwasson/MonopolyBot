@@ -5,7 +5,7 @@ const Canvas = require('canvas')
 const {createCanvas, loadImage} = require('canvas')
 const Roll = require('./roll.js')
 //define struct
-var player = new Object();
+var player;
 //hold the players for game
 var players = []
 var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
@@ -108,6 +108,7 @@ function debug(arguments, receivedMessage){
 }
 
 function addPlayer(arguments, receivedMessage, generalChannel){
+    player = new Object();
     player.playerID = receivedMessage.author.id;
     player.money = 1000;
     player.property = null;
