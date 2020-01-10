@@ -8,6 +8,7 @@ const Roll = require('./roll.js')
 var player;
 //hold the players for game
 var players = []
+var pieces = ["car", "hat", "shoe", "thimble"]
 var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
@@ -104,14 +105,28 @@ function debug(arguments, receivedMessage){
     let generalChannel = client.channels.get("664325321876832258");
     generalChannel.send(JSON.stringify(players));
     generalChannel.send(receivedMessage.author.id);
+    generalChannel.send(pieces.toString());
 
 }
 
-function addPlayer(arguments, receivedMessage, generalChannel){
+async function assginPiece(arguments, generalChannel, message){
+
+    generalChannel.send("What would you like your piece to be?" + pieces.toString());
+    const filter = m => m.content.substr(0);
+    generalChannel.awaitMessages(filter, {max: 10, time: 10000})
+        .then(collected => console.log(collected))
+        .catch(collected => console.log(collected.size))
+
+}
+
+async function addPlayer(arguments, receivedMessage, generalChannel){
     player = new Object();
     player.playerID = receivedMessage.author.id;
     player.money = 1000;
     player.property = null;
+    player.piece = await assginPiece(arguments, generalChannel, receivedMessage);
+    player.pos = 0;
+    player.number = players.length;
     players.push(player);
     //generalChannel.send(JSON.stringify(players));
     //playerCheck.push(receivedMessage.author.id)
@@ -127,6 +142,7 @@ function initCommand(arguments, receivedMessage) {
         if(players.find(({playerID}) => playerID === receivedMessage.author.id))
         {
             playerIn = true;
+            generalChannel.send("Player already added")
         }
         else{
             addPlayer(arguments, receivedMessage, generalChannel)
