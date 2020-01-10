@@ -5,11 +5,7 @@ const Canvas = require('canvas')
 const {createCanvas, loadImage} = require('canvas')
 const Roll = require('./roll.js')
 //define struct
-function player(playerID, money, property) {
-    this.playerID = playerID;
-    this.money = money;
-    this.property = property;
-}
+var player = new Object();
 //hold the players for game
 var players = []
 var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
@@ -65,6 +61,9 @@ function processCommand(receivedMessage) {
     else if(primaryCommand == "roll" || primaryCommand == "Roll") {
         Roll.rollCommand(arguments, receivedMessage, result, counter, generalChannel)
     }
+    else if(primaryCommand == "debug" || primaryCommand == "Debug"){
+        debug(arguments, receivedMessage)
+    }
 }
 
 function helpCommand(arguments, receivedMessage) {
@@ -100,29 +99,40 @@ function startCommand(arguments, receivedMessage) {
     generalChannel.send("Bitch im not ready yet")
 }
 
+function debug(arguments, receivedMessage){
+
+    let generalChannel = client.channels.get("664325321876832258");
+    generalChannel.send(JSON.stringify(players));
+    generalChannel.send(receivedMessage.author.id);
+
+}
+
+function addPlayer(arguments, receivedMessage, generalChannel){
+    player.playerID = receivedMessage.author.id;
+    player.money = 1000;
+    player.property = null;
+    players.push(player);
+    //generalChannel.send(JSON.stringify(players));
+    //playerCheck.push(receivedMessage.author.id)
+}
+
 function initCommand(arguments, receivedMessage) {
     let generalChannel = client.channels.get("664325321876832258")
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
-    var playerIn = false
+    var playerIn = false;
     if (players.length > 0)
     {
-      for (player in players){
-           if (this.playerID == receivedMessage.author.id){
-                generalChannel.send("Error player already added")
-                playerIn = true
-         }
-       }
-       if(!Boolean(playerIn)){
-        players.push(new player(receivedMessage.author.id, 1000, null))
-        generalChannel.send(JSON.stringify(players));
-        playerCheck.push(receivedMessage.author.id)
-       }
+        if(players.find(({playerID}) => playerID === receivedMessage.author.id))
+        {
+            playerIn = true;
+        }
+        else{
+            addPlayer(arguments, receivedMessage, generalChannel)
+        }
     }
     else {
-        players.push(new player(receivedMessage.author.id, 1000, null))
-        generalChannel.send(JSON.stringify(players));
-        playerCheck.push(receivedMessage.author.id)
+        addPlayer(arguments, receivedMessage, generalChannel)
      }
 }
 
