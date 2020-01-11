@@ -55,7 +55,14 @@ function processCommand(receivedMessage) {
         startCommand(arguments, receivedMessage)
     }
     else if(primaryCommand == "init" || primaryCommand == "Init") {
-        initCommand(arguments, receivedMessage)
+        arguments = arguments.toString();
+        generalChannel.send(arguments)
+        if(pieces.includes(arguments)){
+            initCommand(arguments, receivedMessage)
+        }
+        else{
+            generalChannel.send("That has alreadty been picked... try again")
+        }
     }
     else if(primaryCommand == "img" || primaryCommand == "Img") {
         imgCommand(arguments, receivedMessage)
@@ -121,6 +128,23 @@ async function addPlayer(arguments, receivedMessage, generalChannel){
     player.pos = 0;
     player.number = players.length;
     players.push(player);
+    if(arguments == "car")
+    {
+        pieces[0] = "";
+    }
+    else if(arguments == "hat")
+    {
+        pieces[1] = "";
+    }
+    else if(arguments == "shoe")
+    {
+        pieces[2] = "";
+    }
+    else if(arguments == "thimble")
+    {
+        pieces[3] = "";
+    }
+    
     //generalChannel.send(JSON.stringify(players));
     //playerCheck.push(receivedMessage.author.id)
 }
