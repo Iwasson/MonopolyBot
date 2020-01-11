@@ -24,26 +24,82 @@ class List {
         }
     }
 
-    displayAll() {
+    //loads the base game with no properties and no players
+    //fresh game with only base data
+    loadDefault() {
+        var fs = require('fs');
+        var textByLine = fs.readFileSync('assets/Deeds.txt').toString().split("\n");
+        textByLine.forEach(element => {
+            this.append(element);
+        });
+    }
+
+    //loads a saved game with all of the data needed
+    loadCurrent() {
+
+    }
+
+    //saves the games current state
+    saveGame() {
+        const fs = require('fs');
+
+        fs.writeFile('assets/save.txt', "", (err) => {
+            if (err) {
+                throw (err);
+            }
+        })
+
+
         if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+        else {
+            this.current = this.head;
+
+            while (this.current != this.tail) {
+                var deed = this.current.element;
+                fs.appendFileSync('assets/save.txt', deed, (err) => {
+                    if (err) {
+                        throw (err);
+                    }
+                })
+                this.current = this.current.next;
+            }
+            var deed = this.current.element;
+            fs.appendFile('assets/save.txt', deed, (err) => {
+                if (err) {
+                    throw (err);
+                }
+            })
+        }
+    }
+
+    displayAll(generalChannel) {
+    
+        if (this.head == null) {
+            generalChannel.send("List is empty")
             console.log("List is empty")
             return;
         }
         else {
             this.current = this.head;
             while (this.current != this.tail) {
-                console.log(this.current.element + "->");
+                generalChannel.send(this.current.element)
+                console.log(this.current.element);
                 this.current = this.current.next;
             }
-            console.log(this.current.element + "->");
+            generalChannel.send(this.current.element)
+            console.log(this.current.element);
         }
     }
 }
 
+module.exports = List;
+
+/*
 myList = new List();
-
-for(var i = 0; i < 40; i++) {
-    myList.append(i);
-}
-
+myList.loadDefault();
+myList.saveGame();
 myList.displayAll();
+*/
