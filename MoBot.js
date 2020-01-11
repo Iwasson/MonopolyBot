@@ -9,6 +9,7 @@ var player;
 //hold the players for game
 var players = []
 var pieces = ["car", "hat", "shoe", "thimble"]
+var init = false
 var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
@@ -77,7 +78,7 @@ function helpCommand(arguments, receivedMessage) {
     else {
         if(arguments.length == 1) {
             if(arguments[0] == "Init" || arguments[0] == "init") {
-                receivedMessage.channel.send("Initializes the bot for a new game of Monopoly!")
+                receivedMessage.channel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ")
             }
             else if(arguments[0] == "Start" || arguments[0] == "start") {
                 receivedMessage.channel.send("Starts a new game of Monopoly!")
@@ -106,25 +107,17 @@ function debug(arguments, receivedMessage){
     generalChannel.send(JSON.stringify(players));
     generalChannel.send(receivedMessage.author.id);
     generalChannel.send(pieces.toString());
+    generalChannel.send(init)
 
 }
 
-async function assginPiece(arguments, generalChannel, message){
-
-    generalChannel.send("What would you like your piece to be?" + pieces.toString());
-    const filter = m => m.content.substr(0);
-    generalChannel.awaitMessages(filter, {max: 10, time: 10000})
-        .then(collected => console.log(collected))
-        .catch(collected => console.log(collected.size))
-
-}
 
 async function addPlayer(arguments, receivedMessage, generalChannel){
     player = new Object();
     player.playerID = receivedMessage.author.id;
     player.money = 1000;
     player.property = null;
-    player.piece = await assginPiece(arguments, generalChannel, receivedMessage);
+    player.piece = arguments;
     player.pos = 0;
     player.number = players.length;
     players.push(player);
@@ -137,6 +130,7 @@ function initCommand(arguments, receivedMessage) {
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
     var playerIn = false;
+    init = true;
     if (players.length > 0)
     {
         if(players.find(({playerID}) => playerID === receivedMessage.author.id))
