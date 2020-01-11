@@ -134,10 +134,10 @@ async function imgCommand(arguments, receivedMessage) {
             Need to have pre mapped out spaces beacause of the big squares on the corners, cannot move a uniform amount
             Each player needs to be the same size.
     */
-    const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
+    //const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
-	ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
+	//ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
 
     const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
     receivedMessage.reply(attachment);

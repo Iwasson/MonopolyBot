@@ -39,3 +39,11 @@ class List {
         }
     }
 }
+
+myList = new List();
+
+for(var i = 0; i < 40; i++) {
+    myList.append(i);
+}
+
+myList.displayAll();
