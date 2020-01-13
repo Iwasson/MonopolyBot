@@ -60,12 +60,7 @@ function processCommand(receivedMessage) {
 
 function helpCommand(arguments, receivedMessage) {
     if (arguments.length == 0) {
-        receivedMessage.channel.send("List of Commands: ")
-        receivedMessage.channel.send("Init")
-        receivedMessage.channel.send("Start")
-        receivedMessage.channel.send("Roll")
-        receivedMessage.channel.send("Save")
-        receivedMessage.channel.send("Load")
+        receivedMessage.channel.send("List of Commands: \nInit\nStart\nRoll\nSave\nLoad")
     }
     else {
         if (arguments.length == 1) {
@@ -117,34 +112,6 @@ function displayCommand(arguments, receivedMessage) {
     let generalChannel = client.channels.get("664325321876832258");
     myList.displayAll(generalChannel);
 }
-
-/*
-function rollCommand(arguments, receivedMessage, result, counter) {
-    let generalChannel = client.channels.get("664325321876832258")
-    var die1 = getRandomInt(1, 7)
-    var die2 = getRandomInt(1, 7)
-
-    result += die1 + die2
-    generalChannel.send("You Rolled: " + die1 + " and " + die2 + " for a total of: " + result)
-    if (die1 == die2){
-        if(counter >=3){
-            generalChannel.send("That is three doubles in a row... Go to jail.")
-            //Put in go to jail call here
-        }
-        else{
-            generalChannel.send("Doubles! Rolling again...");
-            ++counter;
-            rollCommand(arguments, receivedMessage, result, counter)
-        }
-    }
-}
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-  }
-*/
 
 //Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
 async function imgCommand(arguments, receivedMessage) {

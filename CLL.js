@@ -1,7 +1,43 @@
 class Node {
     constructor(element) {
-        this.element = element;
-        this.next = null;
+        /*
+        The data for each tile of the board will be loaded from a text file which will store the 
+        current values for each tile. It will need to store the following data in the following order:
+            Owner
+            How many houses or a hotel
+            Buyout Price
+            Price of building a house
+            Mortgage
+            Rent with no house
+            Rent with 1 houses
+            Rent with 2 houses
+            Rent with 3 houses
+            Rent with 4 houses
+            Rent with 1 Hotel
+            
+        
+        The game will then constantly update and save and pull from this list. The idea is to have a list 
+        that is being updated each time a player commits to an action, and then to have the game save that data 
+        at the end of their turn. This should minimize overhead and prevent data loss from bot going down or being
+        restarted.
+        */
+
+        this.element = element; //stores name of the tile
+        this.next = null;       //points to next tile on the board
+
+        this.owner = null;  //stores who owns the tile
+        this.houses = 0;    //if its 5 then it will count as a hotel
+        
+        this.rent = null;   //no house rent
+        this.rent1 = null;  //1 house rent
+        this.rent2 = null;  //2 house rent
+        this.rent3 = null;  //3 house rent
+        this.rent4 = null;  //4 house rent
+        this.rentH = null;  //hotel rent
+
+        this.price = null;  //how much the tile costs to buy
+        this.priceH = null; //price per house 
+        this.mortgage = null; //mortgage rate
     }
 }
 
@@ -85,8 +121,8 @@ class List {
         else {
             this.current = this.head;
             while (this.current != this.tail) {
-                generalChannel.send(this.current.element)
-                console.log(this.current.element);
+                generalChannel.send("Title: " + this.current.element + "\nOwner: " + this.current.owner + "\nHomes: " + this.current.houses);
+                console.log("Title: " + this.current.element + "\nOwner: " + this.current.owner + "\nHomes: " + this.current.houses);
                 this.current = this.current.next;
             }
             generalChannel.send(this.current.element)
@@ -96,10 +132,3 @@ class List {
 }
 
 module.exports = List;
-
-/*
-myList = new List();
-myList.loadDefault();
-myList.saveGame();
-myList.displayAll();
-*/
