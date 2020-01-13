@@ -17,7 +17,7 @@ exports.rollCommand = function rollCommand(arguments, receivedMessage, result, c
         else{
             generalChannel.send("Doubles! Rolling again...");
             ++counter;
-            rollCommand(arguments, receivedMessage, result, counter)
+            rollCommand(arguments, receivedMessage, result, counter, generalChannel)
         }
     }
 }
