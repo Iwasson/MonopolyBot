@@ -171,6 +171,7 @@ function initCommand(arguments, receivedMessage) {
      }
 }
 function saveCommand(arguments, receivedMessage) {
+    myList.loadDefault();
     myList.saveGame();
     let generalChannel = client.channels.get("664325321876832258");
     generalChannel.send("Saved!");
