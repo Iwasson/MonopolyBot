@@ -60,6 +60,7 @@ function processCommand(receivedMessage) {
     }
     else if(primaryCommand == "debug" || primaryCommand == "Debug"){
         debug(arguments, receivedMessage)
+    }
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
         Roll.rollCommand(arguments, receivedMessage, result, counter, generalChannel)
     }
