@@ -14,6 +14,7 @@ class Node {
             Rent with 3 houses
             Rent with 4 houses
             Rent with 1 Hotel
+            Is it currently Mortgaged
             
         
         The game will then constantly update and save and pull from this list. The idea is to have a list 
@@ -22,22 +23,27 @@ class Node {
         restarted.
         */
 
-        this.element = element; //stores name of the tile
+        this.element = element; //stores everything temporarily
         this.next = null;       //points to next tile on the board
 
-        this.owner = null;  //stores who owns the tile
-        this.houses = 0;    //if its 5 then it will count as a hotel
+        var title = this.element.toString().split(":");
+        var others = title[1].toString().split("/");
         
-        this.rent = null;   //no house rent
-        this.rent1 = null;  //1 house rent
-        this.rent2 = null;  //2 house rent
-        this.rent3 = null;  //3 house rent
-        this.rent4 = null;  //4 house rent
-        this.rentH = null;  //hotel rent
+        this.title = title[0];
+        this.owner = others[0];  //stores who owns the tile
+        this.houses = others[1];    //if its 5 then it will count as a hotel
+        this.price = others[2];  //how much the tile costs to buy
+        this.priceH = others[3]; //price per house 
+        this.mortgage = others[4]; //mortgage rate
+        
+        this.rent = others[5];   //no house rent
+        this.rent1 = others[6];  //1 house rent
+        this.rent2 = others[7];  //2 house rent
+        this.rent3 = others[8];  //3 house rent
+        this.rent4 = others[9];  //4 house rent
+        this.rentH = others[10];  //hotel rent
 
-        this.price = null;  //how much the tile costs to buy
-        this.priceH = null; //price per house 
-        this.mortgage = null; //mortgage rate
+        this.mortgaged = others[11]; //has it been mortgaged
     }
 }
 
@@ -94,16 +100,15 @@ class List {
             this.current = this.head;
 
             while (this.current != this.tail) {
-                var deed = this.current.element;
-                fs.appendFileSync('assets/save.txt', deed, (err) => {
+                fs.appendFileSync('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 +"/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
                     if (err) {
                         throw (err);
                     }
                 })
                 this.current = this.current.next;
             }
-            var deed = this.current.element;
-            fs.appendFile('assets/save.txt', deed, (err) => {
+
+            fs.appendFile('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 +"/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
                 if (err) {
                     throw (err);
                 }
