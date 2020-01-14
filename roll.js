@@ -5,6 +5,7 @@ exports.rollCommand = function rollCommand(arguments, receivedMessage, result, c
     //let generalChannel = client.channels.get("664325321876832258")
     var die1 = getRandomInt(1, 7)
     var die2 = getRandomInt(1, 7)
+
     client.on('ready', () => {
         console.log("Connected as " + client.user.tag)
     })
