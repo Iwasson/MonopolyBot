@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 const auth = require('./auth.json')
 const client = new Discord.Client()
 const Canvas = require('canvas')
-const {createCanvas, loadImage} = require('canvas')
+const { createCanvas, loadImage } = require('canvas')
 const Roll = require('./roll.js')
 //define struct
 var player;
@@ -16,8 +16,8 @@ client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 
     client.user.setActivity("Monopoly")
-    
-var List = require('./CLL.js')
+
+    var List = require('./CLL.js')
 
     myList = new List;
 })
@@ -46,20 +46,20 @@ function processCommand(receivedMessage) {
     else if (primaryCommand == "Start" || primaryCommand == "start") {
         startCommand(arguments, receivedMessage)
     }
-    else if(primaryCommand == "init" || primaryCommand == "Init") {
+    else if (primaryCommand == "init" || primaryCommand == "Init") {
         arguments = arguments.toString();
         generalChannel.send(arguments)
-        if(pieces.includes(arguments)){
+        if (pieces.includes(arguments)) {
             initCommand(arguments, receivedMessage)
         }
-        else{
+        else {
             generalChannel.send("That has alreadty been picked... try again")
         }
     }
     else if (primaryCommand == "img" || primaryCommand == "Img") {
         imgCommand(arguments, receivedMessage)
     }
-    else if(primaryCommand == "debug" || primaryCommand == "Debug"){
+    else if (primaryCommand == "debug" || primaryCommand == "Debug") {
         debug(arguments, receivedMessage)
     }
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
@@ -89,8 +89,8 @@ function helpCommand(arguments, receivedMessage) {
         receivedMessage.channel.send("List of Commands: \nInit\nStart\nRoll\nSave\nLoad")
     }
     else {
-        if(arguments.length == 1) {
-            if(arguments[0] == "Init" || arguments[0] == "init") {
+        if (arguments.length == 1) {
+            if (arguments[0] == "Init" || arguments[0] == "init") {
                 receivedMessage.channel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ")
             }
             else if (arguments[0] == "Start" || arguments[0] == "start") {
@@ -120,7 +120,7 @@ function startCommand(arguments, receivedMessage) {
     generalChannel.send("Bitch im not ready yet")
 }
 
-function debug(arguments, receivedMessage){
+function debug(arguments, receivedMessage) {
 
     let generalChannel = client.channels.get("664325321876832258");
     generalChannel.send(JSON.stringify(players));
@@ -140,23 +140,19 @@ async function addPlayer(arguments, receivedMessage, generalChannel){
     player.pos = 0;
     player.number = players.length;
     players.push(player);
-    if(arguments == "car")
-    {
+    if (arguments == "car") {
         pieces[0] = "";
     }
-    else if(arguments == "hat")
-    {
+    else if (arguments == "hat") {
         pieces[1] = "";
     }
-    else if(arguments == "shoe")
-    {
+    else if (arguments == "shoe") {
         pieces[2] = "";
     }
-    else if(arguments == "thimble")
-    {
+    else if (arguments == "thimble") {
         pieces[3] = "";
     }
-    
+
     //generalChannel.send(JSON.stringify(players));
     //playerCheck.push(receivedMessage.author.id)
 }
@@ -167,22 +163,21 @@ function initCommand(arguments, receivedMessage) {
     generalChannel.send(attachment)
     var playerIn = false;
     init = true;
-    if (players.length > 0)
-    {
-        if(players.find(({playerID}) => playerID === receivedMessage.author.id))
-        {
+    if (players.length > 0) {
+        if (players.find(({ playerID }) => playerID === receivedMessage.author.id)) {
             playerIn = true;
             generalChannel.send("Player already added")
         }
-        else{
+        else {
             addPlayer(arguments, receivedMessage, generalChannel)
         }
     }
     else {
         addPlayer(arguments, receivedMessage, generalChannel)
-     }
+    }
 }
 function saveCommand(arguments, receivedMessage) {
+    myList.loadDefault();
     myList.saveGame();
     let generalChannel = client.channels.get("664325321876832258");
     generalChannel.send("Saved!");

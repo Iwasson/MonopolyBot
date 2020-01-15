@@ -78,7 +78,11 @@ class List {
 
     //loads a saved game with all of the data needed
     loadCurrent() {
-
+        var fs = require('fs');
+        var textByLine = fs.readFileSync('assets/save.txt').toString().split("\n");
+        textByLine.forEach(element => {
+            this.append(element);
+        });
     }
 
     //saves the games current state
@@ -90,7 +94,6 @@ class List {
                 throw (err);
             }
         })
-
 
         if (this.head == null) {
             console.log("List is empty");
@@ -126,12 +129,12 @@ class List {
         else {
             this.current = this.head;
             while (this.current != this.tail) {
-                generalChannel.send("Title: " + this.current.element + "\nOwner: " + this.current.owner + "\nHomes: " + this.current.houses);
-                console.log("Title: " + this.current.element + "\nOwner: " + this.current.owner + "\nHomes: " + this.current.houses);
+                generalChannel.send("Title: " + this.current.title + "\tOwner: " + this.current.owner + "\tHomes: " + this.current.houses);
+                console.log("Title: " + this.current.title + "\tOwner: " + this.current.owner + "\tHomes: " + this.current.houses);
                 this.current = this.current.next;
             }
-            generalChannel.send(this.current.element)
-            console.log(this.current.element);
+            generalChannel.send("Title: " + this.current.title + "\tOwner: " + this.current.owner + "\tHomes: " + this.current.houses);
+            console.log("Title: " + this.current.title + "\tOwner: " + this.current.owner + "\tHomes: " + this.current.houses);
         }
     }
 }
