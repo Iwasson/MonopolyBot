@@ -64,12 +64,12 @@ function processCommand(receivedMessage) {
     }
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
         //add the value of the roll to the player pos
-        players[0].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
-        if (players[0].pos > 39){
-            players[0].pos = (players[0].pos % 40);
-            players[0].money += 200;
+        players[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
+        if (players[playerTurn].pos > 39){
+            players[playerTurn].pos = (players[0].pos % 40);
+            players[playerTurn].money += 200;
         }
-        if (playerTurn == 3){//if it is the last player reset to first player
+        if (playerTurn == (players.length - 1)){//if it is the last player reset to first player
             playerTurn = 0;
         }
         else{
