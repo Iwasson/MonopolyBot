@@ -9,8 +9,10 @@ var player;
 //hold the players for game
 var players = []
 var pieces = ["car", "hat", "shoe", "thimble"]
-var init = false
+var init = false;
 var playerTurn = 0;
+//flag for the start of the game
+var gameStart = false;
 var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
@@ -44,45 +46,66 @@ function processCommand(receivedMessage) {
         helpCommand(arguments, receivedMessage)
     }
     else if (primaryCommand == "Start" || primaryCommand == "start") {
-        startCommand(arguments, receivedMessage)
+        if (gameStart == false){
+            startCommand(arguments, receivedMessage)
+            gameStart = true;
+        }
+        else{
+            generalChannel.send("Game has already begun")
+        }
     }
     else if (primaryCommand == "init" || primaryCommand == "Init") {
-        arguments = arguments.toString();
-        generalChannel.send(arguments)
-        if (pieces.includes(arguments)) {
-            initCommand(arguments, receivedMessage)
+        if (gameStart == false){
+            arguments = arguments.toString();
+            generalChannel.send(arguments)
+            if (pieces.includes(arguments)) {
+                initCommand(arguments, receivedMessage)
+            }
+            else {
+              generalChannel.send("That has alreadty been picked... try again")
+            }
         }
-        else {
-            generalChannel.send("That has alreadty been picked... try again")
+        else{
+            generalChannel.send("Game has already begun")
         }
     }
     else if (primaryCommand == "img" || primaryCommand == "Img") {
-        imgCommand(arguments, receivedMessage)
+        if (gameStart == true){
+            imgCommand(arguments, receivedMessage)
+        }
+        else{
+            generalChannel.send("Game has not begun yet")
+        }
     }
     else if (primaryCommand == "debug" || primaryCommand == "Debug") {
         debug(arguments, receivedMessage)
     }
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
         //add the value of the roll to the player pos
-        if (receivedMessage.author.id === players[playerTurn].playerID){
-            players[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
-            if (players[playerTurn].pos > 39){
-                players[playerTurn].pos = (players[0].pos % 40);
-                players[playerTurn].money += 200;
-            }
-            if (playerTurn == (players.length - 1)){//if it is the last player reset to first player
-                playerTurn = 0;
+        if(gameStart == true){
+            if (receivedMessage.author.id === players[playerTurn].playerID){
+                players[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
+                if (players[playerTurn].pos > 39){
+                    players[playerTurn].pos = (players[0].pos % 40);
+                    players[playerTurn].money += 200;
+                }
+                if (playerTurn == (players.length - 1)){//if it is the last player reset to first player
+                 playerTurn = 0;
+                }
+                else{
+                    ++playerTurn;//move to the next player
+                }
             }
             else{
-                ++playerTurn;//move to the next player
-            }
+                generalChannel.send("Not your turn!")
+                }
         }
         else{
-            generalChannel.send("Not your turn!")
+            generalChannel.send("Game has not begun yet")
         }
     }
     else if (primaryCommand == "save" || primaryCommand == "Save") {
-        saveCommand(arguments, receivedMessage)
+    saveCommand(arguments, receivedMessage)
     }
     else if (primaryCommand == "display" || primaryCommand == "Display") {
         displayCommand(arguments, receivedMessage)
