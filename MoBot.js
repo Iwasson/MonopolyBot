@@ -10,6 +10,7 @@ var player;
 var players = []
 var pieces = ["car", "hat", "shoe", "thimble"]
 var init = false
+var playerTurn = 0;
 var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
@@ -62,7 +63,18 @@ function processCommand(receivedMessage) {
         debug(arguments, receivedMessage)
     }
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
-        Roll.rollCommand(arguments, receivedMessage, result, counter, generalChannel)
+        //add the value of the roll to the player pos
+        players[0].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
+        if (players[0].pos > 39){
+            players[0].pos = (players[0].pos % 40);
+            players[0].money += 200;
+        }
+        if (playerTurn == 3){//if it is the last player reset to first player
+            playerTurn = 0;
+        }
+        else{
+            ++playerTurn;//move to the next player
+        }
     }
     else if (primaryCommand == "save" || primaryCommand == "Save") {
         saveCommand(arguments, receivedMessage)
@@ -120,11 +132,11 @@ function debug(arguments, receivedMessage){
 
 
 async function addPlayer(arguments, receivedMessage, generalChannel){
-    player = new Object();
-    player.playerID = receivedMessage.author.id;
-    player.money = 1000;
-    player.property = null;
-    player.piece = arguments;
+    player = new Object();//Creates a new player to be pushed to players array
+    player.playerID = receivedMessage.author.id;//player id is the id of the person who called the init command
+    player.money = 1500;//starting money for each player
+    player.property = null;//Start with no properties
+    player.piece = arguments;//What piece did the player pick?
     player.pos = 0;
     player.number = players.length;
     players.push(player);

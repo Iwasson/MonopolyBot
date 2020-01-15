@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-exports.rollCommand = function rollCommand(arguments, receivedMessage, result, counter, generalChannel) {
+exports.rollCommand = function rollCommand(arguments, receivedMessage, counter, generalChannel) {
     //let generalChannel = client.channels.get("664325321876832258")
     var die1 = getRandomInt(1, 7)
     var die2 = getRandomInt(1, 7)
@@ -9,7 +9,7 @@ exports.rollCommand = function rollCommand(arguments, receivedMessage, result, c
     client.on('ready', () => {
         console.log("Connected as " + client.user.tag)
     })
-    result += die1 + die2
+    var result = die1 + die2
     generalChannel.send("You Rolled: " + die1 + " and " + die2 + " for a total of: " + result)
     if (die1 == die2) {
         if (counter >= 3) {
@@ -19,9 +19,10 @@ exports.rollCommand = function rollCommand(arguments, receivedMessage, result, c
         else {
             generalChannel.send("Doubles! Rolling again...");
             ++counter;
-            rollCommand(arguments, receivedMessage, result, counter)
+            result += rollCommand(arguments, receivedMessage, counter, generalChannel)
         }
     }
+    return result;
 }
 
 function getRandomInt(min, max) {
