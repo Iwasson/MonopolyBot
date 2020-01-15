@@ -64,16 +64,21 @@ function processCommand(receivedMessage) {
     }
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
         //add the value of the roll to the player pos
-        players[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
-        if (players[playerTurn].pos > 39){
-            players[playerTurn].pos = (players[0].pos % 40);
-            players[playerTurn].money += 200;
-        }
-        if (playerTurn == (players.length - 1)){//if it is the last player reset to first player
-            playerTurn = 0;
+        if (receivedMessage.author.id === players[playerTurn].playerID){
+            players[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
+            if (players[playerTurn].pos > 39){
+                players[playerTurn].pos = (players[0].pos % 40);
+                players[playerTurn].money += 200;
+            }
+            if (playerTurn == (players.length - 1)){//if it is the last player reset to first player
+                playerTurn = 0;
+            }
+            else{
+                ++playerTurn;//move to the next player
+            }
         }
         else{
-            ++playerTurn;//move to the next player
+            generalChannel.send("Not your turn!")
         }
     }
     else if (primaryCommand == "save" || primaryCommand == "Save") {
