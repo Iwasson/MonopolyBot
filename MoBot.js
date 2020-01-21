@@ -1,19 +1,17 @@
-const Discord = require('discord.js')
-const auth = require('./auth.json')
-const client = new Discord.Client()
-const Canvas = require('canvas')
+const Discord = require('discord.js')//js library with commands for discord
+const auth = require('./auth.json')//auth tokens for logging into bot
+const client = new Discord.Client()//create a new discord client for the bot
+const Canvas = require('canvas')//used to draw on images
 const { createCanvas, loadImage } = require('canvas')
 const Roll = require('./roll.js')
-//define struct
-var player;
-//hold the players for game
-var players = []
-var pieces = ["car", "hat", "shoe", "thimble"]
-var init = false;
-var playerTurn = 0;
-//flag for the start of the game
-var gameStart = false;
-var playerCheck = []//testing for right now to check if a player has already been added, in future check the player objects
+
+var player;//define struct
+var playerList = []//hold the players for game
+var pieces = ["car", "hat", "shoe", "thimble"]//Pieces available for use 
+var playerTurn = 0;//whos turn is it? 0 through players.length - 1
+var gameStart = false;//flag for the start of the game, allows more functions to be called once the game has started
+
+//when the bot is initialized call the other files
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
 
@@ -38,20 +36,19 @@ function processCommand(receivedMessage) {
     let splitCommand = fullCommand.split(" ")           //splits the command, using spaces, into a command and then args
     let primaryCommand = splitCommand[0]                //sets the primary command
     let arguments = splitCommand.slice(1)               //sets an array of arguments
-    var result = 0;
     var counter = 0;
-    let generalChannel = client.channels.get("664325321876832258")
-
+    let generalChannel = client.channels.get("664325321876832258")//Should replace with a monopoly channel 
+    //Check to see what command the user entered
     if (primaryCommand == "help" || primaryCommand == "Help") {
         helpCommand(arguments, receivedMessage)
     }
-    else if (primaryCommand == "Start" || primaryCommand == "start") {
+    else if (primaryCommand == "Start" || primaryCommand == "start") {//Start the game... set flag to true
         if (gameStart == false){
             startCommand(arguments, receivedMessage)
             gameStart = true;
         }
         else{
-            generalChannel.send("Game has already begun")
+            generalChannel.send("Game has already begun")//cannot call start if game has already started
         }
     }
     else if (primaryCommand == "init" || primaryCommand == "Init") {
@@ -83,13 +80,13 @@ function processCommand(receivedMessage) {
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {
         //add the value of the roll to the player pos
         if(gameStart == true){
-            if (receivedMessage.author.id === players[playerTurn].playerID){
-                players[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
-                if (players[playerTurn].pos > 39){
-                    players[playerTurn].pos = (players[0].pos % 40);
-                    players[playerTurn].money += 200;
+            if (receivedMessage.author.id === playerList[playerTurn].playerID){
+                playerList[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
+                if (playerList[playerTurn].pos > 39){
+                    playerList[playerTurn].pos = (playerList[0].pos % 40);
+                    playerList[playerTurn].money += 200;
                 }
-                if (playerTurn == (players.length - 1)){//if it is the last player reset to first player
+                if (playerTurn == (playerList.length - 1)){//if it is the last player reset to first player
                  playerTurn = 0;
                 }
                 else{
@@ -151,10 +148,9 @@ function startCommand(arguments, receivedMessage) {
 function debug(arguments, receivedMessage) {
 
     let generalChannel = client.channels.get("664325321876832258");
-    generalChannel.send(JSON.stringify(players));
+    generalChannel.send(JSON.stringify(playerList));
     generalChannel.send(receivedMessage.author.id);
     generalChannel.send(pieces.toString());
-    generalChannel.send(init)
 
 }
 
@@ -166,8 +162,8 @@ async function addPlayer(arguments, receivedMessage, generalChannel){
     player.property = null;//Start with no properties
     player.piece = arguments;//What piece did the player pick?
     player.pos = 0;
-    player.number = players.length;
-    players.push(player);
+    player.number = playerList.length;
+    playerList.push(player);
     if (arguments == "car") {
         pieces[0] = "";
     }
@@ -190,9 +186,8 @@ function initCommand(arguments, receivedMessage) {
     const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
     generalChannel.send(attachment)
     var playerIn = false;
-    init = true;
-    if (players.length > 0) {
-        if (players.find(({ playerID }) => playerID === receivedMessage.author.id)) {
+    if (playerList.length > 0) {
+        if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
             playerIn = true;
             generalChannel.send("Player already added")
         }
@@ -230,14 +225,6 @@ async function imgCommand(arguments, receivedMessage) {
     //ctx.font = '28px sans-serif';
     //ctx.fillStyle = '#ffffff';
     //ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 3.5);
-    //================================================================================
-    /*
-    ToDo:
-        Add monopoly pieces to the board
-        Function to make them move x amount of places
-            Need to have pre mapped out spaces beacause of the big squares on the corners, cannot move a uniform amount
-            Each player needs to be the same size.
-    */
     //const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
