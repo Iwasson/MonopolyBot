@@ -7,5 +7,5 @@ to or endorsed by Hasbro.
 
 NPM installs
 ===================
-discord.js \n
-canvas
+->discord.js<br>
+->canvas
