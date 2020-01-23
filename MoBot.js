@@ -52,21 +52,22 @@ function processCommand(receivedMessage) {
         }
     }
     else if (primaryCommand == "init" || primaryCommand == "Init") {
-        if (gameStart == false){
+        if (gameStart == false){//only initialize a player if the game has not started yet.
             arguments = arguments.toString();
             generalChannel.send(arguments)
             if (pieces.includes(arguments)) {
                 initCommand(arguments, receivedMessage)
             }
             else {
-              generalChannel.send("That has alreadty been picked... try again")
+              generalChannel.send("Error, not a valid choice. Please pick from the list below.");
+              generalChannel.send(pieces);
             }
         }
         else{
             generalChannel.send("Game has already begun")
         }
     }
-    else if (primaryCommand == "img" || primaryCommand == "Img") {
+    else if (primaryCommand == "img" || primaryCommand == "Img") {//display the board
         if (gameStart == true){
             imgCommand(arguments, receivedMessage)
         }
@@ -74,10 +75,10 @@ function processCommand(receivedMessage) {
             generalChannel.send("Game has not begun yet")
         }
     }
-    else if (primaryCommand == "debug" || primaryCommand == "Debug") {
+    else if (primaryCommand == "debug" || primaryCommand == "Debug") {//for use by devs, displays information
         debug(arguments, receivedMessage)
     }
-    else if (primaryCommand == "roll" || primaryCommand == "Roll") {
+    else if (primaryCommand == "roll" || primaryCommand == "Roll") {//roll function from roll.js
         //add the value of the roll to the player pos
         if(gameStart == true){
             if (receivedMessage.author.id === playerList[playerTurn].playerID){
@@ -165,16 +166,16 @@ async function addPlayer(arguments, receivedMessage, generalChannel){
     player.number = playerList.length;
     playerList.push(player);
     if (arguments == "car") {
-        pieces[0] = "";
+        pieces = pieces.filter(e => e !== "car");
     }
     else if (arguments == "hat") {
-        pieces[1] = "";
+        pieces = pieces.filter(e => e !== "hat");
     }
     else if (arguments == "shoe") {
-        pieces[2] = "";
+        pieces = pieces.filter(e => e !== "shoe");
     }
     else if (arguments == "thimble") {
-        pieces[3] = "";
+        pieces = pieces.filter(e => e !== "thimble");
     }
 
     //generalChannel.send(JSON.stringify(players));
