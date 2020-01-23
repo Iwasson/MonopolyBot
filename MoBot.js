@@ -1,6 +1,7 @@
 const Discord = require('discord.js')//js library with commands for discord
 const auth = require('./auth.json')//auth tokens for logging into bot
 const client = new Discord.Client()//create a new discord client for the bot
+
 const Canvas = require('canvas')//used to draw on images
 const { createCanvas, loadImage } = require('canvas')
 const Roll = require('./roll.js')
@@ -13,71 +14,58 @@ var gameStart = false;//flag for the start of the game, allows more functions to
 
 //when the bot is initialized call the other files
 client.on('ready', () => {
+    generalChannel = client.channels.get("664325321876832258"); //general channel for testing purposes WILL NEED TO NOT HARD CODE
     console.log("Connected as " + client.user.tag)
-
     client.user.setActivity("Monopoly")
-
     var List = require('./CLL.js')
-
     myList = new List;
 })
 
 //Listens for commands from the user
 client.on('message', (receivedMessage) => {
     if (receivedMessage.author == client.user) { return }
-
-    if (receivedMessage.content.startsWith(">")) {
-        processCommand(receivedMessage)
-    }
+    if (receivedMessage.content.startsWith(">")) { processCommand(receivedMessage) }
 })
 
 function processCommand(receivedMessage) {
     let fullCommand = receivedMessage.content.substr(1) //copies the command removing the first char
     let splitCommand = fullCommand.split(" ")           //splits the command, using spaces, into a command and then args
     let primaryCommand = splitCommand[0]                //sets the primary command
+    primaryCommand = primaryCommand.toLowerCase();      //sets the command to lowercase
     let arguments = splitCommand.slice(1)               //sets an array of arguments
     var counter = 0;
-    let generalChannel = client.channels.get("664325321876832258")//Should replace with a monopoly channel 
+    
+    switch (primaryCommand) {
+        case 'help':
+            helpCommand(arguments);
+            break;
+        case 'start':
+            startCommand(arguments);
+            break;
+        case 'init':
+            initCommand(arguments, receivedMessage);
+            break;
+        case 'img':
+            imgCommand(arguments);
+            break;
+        case 'debug':
+            debug(arguments, receivedMessage);
+            break;
+        case 'roll':
+            rollCommand(arguments);
+            break;
+        case 'save':
+            saveCommand(arguments);
+            break;
+        case 'display':
+            displayCommand(arguments);
+            break;
+        default:
+            generalChannel.send("I don't understand the request")
+            break
+    }
     //Check to see what command the user entered
-    if (primaryCommand == "help" || primaryCommand == "Help") {
-        helpCommand(arguments, receivedMessage)
-    }
-    else if (primaryCommand == "Start" || primaryCommand == "start") {//Start the game... set flag to true
-        if (gameStart == false){
-            startCommand(arguments, receivedMessage)
-            gameStart = true;
-        }
-        else{
-            generalChannel.send("Game has already begun")//cannot call start if game has already started
-        }
-    }
-    else if (primaryCommand == "init" || primaryCommand == "Init") {
-        if (gameStart == false){//only initialize a player if the game has not started yet.
-            arguments = arguments.toString();
-            generalChannel.send(arguments)
-            if (pieces.includes(arguments)) {
-                initCommand(arguments, receivedMessage)
-            }
-            else {
-              generalChannel.send("Error, not a valid choice. Please pick from the list below.");
-              generalChannel.send(pieces);
-            }
-        }
-        else{
-            generalChannel.send("Game has already begun")
-        }
-    }
-    else if (primaryCommand == "img" || primaryCommand == "Img") {//display the board
-        if (gameStart == true){
-            imgCommand(arguments, receivedMessage)
-        }
-        else{
-            generalChannel.send("Game has not begun yet")
-        }
-    }
-    else if (primaryCommand == "debug" || primaryCommand == "Debug") {//for use by devs, displays information
-        debug(arguments, receivedMessage)
-    }
+    /*
     else if (primaryCommand == "roll" || primaryCommand == "Roll") {//roll function from roll.js
         //add the value of the roll to the player pos
         if(gameStart == true){
@@ -102,66 +90,57 @@ function processCommand(receivedMessage) {
             generalChannel.send("Game has not begun yet")
         }
     }
-    else if (primaryCommand == "save" || primaryCommand == "Save") {
-    saveCommand(arguments, receivedMessage)
-    }
-    else if (primaryCommand == "display" || primaryCommand == "Display") {
-        displayCommand(arguments, receivedMessage)
+    */
+}
+
+function helpCommand(arguments) {
+    if(arguments[0] != null) { arguments[0] = arguments[0].toLowerCase(); }
+    switch (arguments[0]) {
+        case 'init':
+            generalChannel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ");
+            break;
+        case 'start':
+            generalChannel.send("Starts a new game of Monopoly!");
+            break;
+        case 'roll':
+            generalChannel.send("Roll your two die");
+            break;
+        case 'save':
+            generalChannel.send("Saves the current state of the game");
+            break;
+        case 'load':
+            generalChannel.send("Loads a saved game");
+            break;
+        default:
+            generalChannel.send("List of Commands: \nInit\nStart\nRoll\nSave\nLoad")
+            break;
     }
 }
 
-function helpCommand(arguments, receivedMessage) {
-    if (arguments.length == 0) {
-        receivedMessage.channel.send("List of Commands: \nInit\nStart\nRoll\nSave\nLoad")
-    }
-    else {
-        if (arguments.length == 1) {
-            if (arguments[0] == "Init" || arguments[0] == "init") {
-                receivedMessage.channel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ")
-            }
-            else if (arguments[0] == "Start" || arguments[0] == "start") {
-                receivedMessage.channel.send("Starts a new game of Monopoly!")
-            }
-            else if (arguments[0] == "Roll" || arguments[0] == "roll") {
-                receivedMessage.channel.send("Roll your two die")
-            }
-            else if (arguments[0] == "Save" || arguments[0] == "save") {
-                receivedMessage.channel.send("Saves the current state of the game")
-            }
-            else if (arguments[0] == "Load" || arguments[0] == "load") {
-                receivedMessage.channel.send("Loads a saved game")
-            }
-            else {
-                receivedMessage.channel.send("Sorry thats not a command I can help you with...")
-            }
-        }
-        else {
-            receivedMessage.channel.send("Sorry I can only help with one command at a time, please try again.")
-        }
-    }
-}
-
-function startCommand(arguments, receivedMessage) {
-    let generalChannel = client.channels.get("664325321876832258")
-    generalChannel.send("Bitch im not ready yet")
+function startCommand(arguments) {
+    generalChannel.send("Im Working on it dammit")
 }
 
 function debug(arguments, receivedMessage) {
-
-    let generalChannel = client.channels.get("664325321876832258");
     generalChannel.send(JSON.stringify(playerList));
     generalChannel.send(receivedMessage.author.id);
     generalChannel.send(pieces.toString());
 
 }
 
+async function addPlayer(arguments, receivedMessage){
 
-async function addPlayer(arguments, receivedMessage, generalChannel){
-    player = new Object();//Creates a new player to be pushed to players array
+    if (!pieces.includes(arguments[0])) {
+        generalChannel.send("Error, not a valid choice. Please pick from the list below.");
+        generalChannel.send(pieces);
+        return;
+    }
+
+    player = new Object();                      //Creates a new player to be pushed to players array
     player.playerID = receivedMessage.author.id;//player id is the id of the person who called the init command
-    player.money = 1500;//starting money for each player
-    player.property = null;//Start with no properties
-    player.piece = arguments;//What piece did the player pick?
+    player.money = 1500;                        //starting money for each player
+    player.property = null;                     //Start with no properties
+    player.piece = arguments;                   //What piece did the player pick?
     player.pos = 0;
     player.number = playerList.length;
     playerList.push(player);
@@ -177,14 +156,11 @@ async function addPlayer(arguments, receivedMessage, generalChannel){
     else if (arguments == "thimble") {
         pieces = pieces.filter(e => e !== "thimble");
     }
-
-    //generalChannel.send(JSON.stringify(players));
-    //playerCheck.push(receivedMessage.author.id)
 }
 
 function initCommand(arguments, receivedMessage) {
-    let generalChannel = client.channels.get("664325321876832258")
-    const attachment = new Discord.Attachment("https://i.pinimg.com/originals/70/f5/43/70f5434216f0fb0a45c4d75d83f41b5b.jpg")
+    if(receivedMessage == null) {return}
+    const attachment = new Discord.Attachment("assets/monopolyMan.jpg")
     generalChannel.send(attachment)
     var playerIn = false;
     if (playerList.length > 0) {
@@ -193,27 +169,26 @@ function initCommand(arguments, receivedMessage) {
             generalChannel.send("Player already added")
         }
         else {
-            addPlayer(arguments, receivedMessage, generalChannel)
+            addPlayer(arguments, receivedMessage)
         }
     }
     else {
-        addPlayer(arguments, receivedMessage, generalChannel)
+        addPlayer(arguments, receivedMessage)
     }
 }
-function saveCommand(arguments, receivedMessage) {
+
+function saveCommand(arguments) {
     myList.loadDefault();
     myList.saveGame();
-    let generalChannel = client.channels.get("664325321876832258");
     generalChannel.send("Saved!");
 }
 
-function displayCommand(arguments, receivedMessage) {
-    let generalChannel = client.channels.get("664325321876832258");
+function displayCommand(arguments) {
     myList.displayAll(generalChannel);
 }
 
 //Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
-async function imgCommand(arguments, receivedMessage) {
+async function imgCommand(arguments) {
     const canvas = Canvas.createCanvas(1000, 1000);
     const ctx = canvas.getContext('2d');
     const background = await Canvas.loadImage('./assets/Board.jpg');
@@ -232,7 +207,7 @@ async function imgCommand(arguments, receivedMessage) {
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
 
     const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
-    receivedMessage.reply(attachment);
+    generalChannel.send(attachment);
 
 }
 
