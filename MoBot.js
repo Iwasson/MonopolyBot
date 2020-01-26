@@ -9,7 +9,6 @@ const Roll = require('./roll.js')
 var player;//define struct
 var playerList = []//hold the players for game
 var pieces = ["car", "hat", "shoe", "thimble"]//Pieces available for use 
-var playerTurn = 0;//whos turn is it? 0 through players.length - 1
 var gameStart = false;//flag for the start of the game, allows more functions to be called once the game has started
 
 //when the bot is initialized call the other files
@@ -33,8 +32,7 @@ function processCommand(receivedMessage) {
     let primaryCommand = splitCommand[0]                //sets the primary command
     primaryCommand = primaryCommand.toLowerCase();      //sets the command to lowercase
     let arguments = splitCommand.slice(1)               //sets an array of arguments
-    var counter = 0;
-    
+
     switch (primaryCommand) {
         case 'help':
             helpCommand(arguments);
@@ -64,33 +62,6 @@ function processCommand(receivedMessage) {
             generalChannel.send("I don't understand the request")
             break
     }
-    //Check to see what command the user entered
-    /*
-    else if (primaryCommand == "roll" || primaryCommand == "Roll") {//roll function from roll.js
-        //add the value of the roll to the player pos
-        if(gameStart == true){
-            if (receivedMessage.author.id === playerList[playerTurn].playerID){
-                playerList[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
-                if (playerList[playerTurn].pos > 39){
-                    playerList[playerTurn].pos = (playerList[0].pos % 40);
-                    playerList[playerTurn].money += 200;
-                }
-                if (playerTurn == (playerList.length - 1)){//if it is the last player reset to first player
-                 playerTurn = 0;
-                }
-                else{
-                    ++playerTurn;//move to the next player
-                }
-            }
-            else{
-                generalChannel.send("Not your turn!")
-                }
-        }
-        else{
-            generalChannel.send("Game has not begun yet")
-        }
-    }
-    */
 }
 
 function helpCommand(arguments) {
@@ -156,22 +127,14 @@ async function addPlayer(arguments, receivedMessage){
     else if (arguments == "thimble") {
         pieces = pieces.filter(e => e !== "thimble");
     }
+    generalChannel.send("Player added!")
 }
 
 function initCommand(arguments, receivedMessage) {
     if(receivedMessage == null) {return}
-    const attachment = new Discord.Attachment("assets/monopolyMan.jpg")
-    generalChannel.send(attachment)
-    var playerIn = false;
-    if (playerList.length > 0) {
-        if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
-            playerIn = true;
-            generalChannel.send("Player already added")
+    if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
+        generalChannel.send("Player already added")
         }
-        else {
-            addPlayer(arguments, receivedMessage)
-        }
-    }
     else {
         addPlayer(arguments, receivedMessage)
     }
@@ -187,7 +150,6 @@ function displayCommand(arguments) {
     myList.displayAll(generalChannel);
 }
 
-//Tutorial @https://discordjs.guide/popular-topics/canvas.html#adding-in-text
 async function imgCommand(arguments) {
     const canvas = Canvas.createCanvas(1000, 1000);
     const ctx = canvas.getContext('2d');
@@ -196,11 +158,6 @@ async function imgCommand(arguments) {
 
     ctx.strokeStyle = '#74037b';
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
-    //used to print text.. not needed right now
-    // Slightly smaller text placed above the member's display name
-    //ctx.font = '28px sans-serif';
-    //ctx.fillStyle = '#ffffff';
-    //ctx.fillText('Welcome to the server,', canvas.width / 2.5, canvas.height / 3.5);
     //const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
