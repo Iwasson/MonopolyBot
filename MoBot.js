@@ -127,14 +127,14 @@ async function addPlayer(arguments, receivedMessage) {
     else if (arguments == "thimble") {
         pieces = pieces.filter(e => e !== "thimble");
     }
+    generalChannel.send("Player added!")
 }
 
 function initCommand(arguments, receivedMessage) {
-    if (receivedMessage == null) { return }
+    if(receivedMessage == null) {return}
     if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
-        playerIn = true;
         generalChannel.send("Player already added")
-    }
+        }
     else {
         addPlayer(arguments, receivedMessage)
     }

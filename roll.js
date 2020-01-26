@@ -30,3 +30,30 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
+    //Check to see what command the user entered
+    /*
+    else if (primaryCommand == "roll" || primaryCommand == "Roll") {//roll function from roll.js
+        //add the value of the roll to the player pos
+        if(gameStart == true){
+            if (receivedMessage.author.id === playerList[playerTurn].playerID){
+                playerList[playerTurn].pos += Roll.rollCommand(arguments, receivedMessage, counter, generalChannel)
+                if (playerList[playerTurn].pos > 39){
+                    playerList[playerTurn].pos = (playerList[0].pos % 40);
+                    playerList[playerTurn].money += 200;
+                }
+                if (playerTurn == (playerList.length - 1)){//if it is the last player reset to first player
+                 playerTurn = 0;
+                }
+                else{
+                    ++playerTurn;//move to the next player
+                }
+            }
+            else{
+                generalChannel.send("Not your turn!")
+                }
+        }
+        else{
+            generalChannel.send("Game has not begun yet")
+        }
+    }
+    */
