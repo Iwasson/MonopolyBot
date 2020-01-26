@@ -134,7 +134,7 @@ function initCommand(arguments, receivedMessage) {
     if(receivedMessage == null) {return}
     if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
         generalChannel.send("Player already added")
-        }
+    }
     else {
         addPlayer(arguments, receivedMessage)
     }
