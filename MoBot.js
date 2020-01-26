@@ -1,15 +1,15 @@
-const Discord = require('discord.js')//js library with commands for discord
-const auth = require('./auth.json')//auth tokens for logging into bot
-const client = new Discord.Client()//create a new discord client for the bot
+const Discord = require('discord.js')           //js library with commands for discord
+const auth = require('./auth.json')             //auth tokens for logging into bot
+const client = new Discord.Client()             //create a new discord client for the bot
 
-const Canvas = require('canvas')//used to draw on images
+const Canvas = require('canvas')                //used to draw on images
 const { createCanvas, loadImage } = require('canvas')
 const Roll = require('./roll.js')
 
-var player;//define struct
-var playerList = []//hold the players for game
-var pieces = ["car", "hat", "shoe", "thimble"]//Pieces available for use 
-var gameStart = false;//flag for the start of the game, allows more functions to be called once the game has started
+var player;                                     //define struct
+var playerList = []                             //hold the players for game
+var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use 
+var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
 
 //when the bot is initialized call the other files
 client.on('ready', () => {
@@ -65,7 +65,7 @@ function processCommand(receivedMessage) {
 }
 
 function helpCommand(arguments) {
-    if(arguments[0] != null) { arguments[0] = arguments[0].toLowerCase(); }
+    if (arguments[0] != null) { arguments[0] = arguments[0].toLowerCase(); }
     switch (arguments[0]) {
         case 'init':
             generalChannel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ");
@@ -99,7 +99,7 @@ function debug(arguments, receivedMessage) {
 
 }
 
-async function addPlayer(arguments, receivedMessage){
+async function addPlayer(arguments, receivedMessage) {
 
     if (!pieces.includes(arguments[0])) {
         generalChannel.send("Error, not a valid choice. Please pick from the list below.");
@@ -138,6 +138,7 @@ function initCommand(arguments, receivedMessage) {
     else {
         addPlayer(arguments, receivedMessage)
     }
+
 }
 
 function saveCommand(arguments) {
@@ -163,7 +164,7 @@ async function imgCommand(arguments) {
     //871.1538459 is the bottom row
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
 
-    const attachment = new Discord.Attachment(canvas.toBuffer(), 'https://i.dailymail.co.uk/i/pix/2011/06/03/article-1393521-0C6047E600000578-120_964x966.jpg');
+    const attachment = new Discord.Attachment(canvas.toBuffer());
     generalChannel.send(attachment);
 
 }
