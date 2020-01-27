@@ -59,7 +59,7 @@ function processCommand(receivedMessage) {
             break;
         case 'roll':
             if (turn(playerList, receivedMessage))
-                rollCommand(receivedMessage);
+                playerList[turnCounter].pos = rollCommand(receivedMessage);
             break;
         case 'reroll':
             generalChannel.send("Reseting roll");
@@ -72,7 +72,7 @@ function processCommand(receivedMessage) {
             displayCommand(arguments);
             break;
         case 'end':
-            if(turn(receivedMessage))
+            if (turn(receivedMessage))
                 endTurn();
             break;
         case 'stop':
@@ -249,8 +249,11 @@ function rollCommand(receivedMessage) {
     if (doubleCounter > 2) {
         generalChannel.send("Doubles three times in a row!? Clearly you must be cheating! To jail with you!");
         playerRoll = true;
+        return 11;
     }
-    return;
+    else {
+        return result;
+    }
 }
 
 //generates a random number between 1 and 7
@@ -262,18 +265,18 @@ function getRandomInt(min, max) {
 
 //ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
 function endTurn() {
-    if(playerRoll == false) {
+    if (playerRoll == false) {
         generalChannel.send("You haven't rolled yet!");
         return;
     }
-    
+
     generalChannel.send("Ending your turn...");
     ++turnCounter;      //advance the turn counter by 1
     playerRoll = false; //resets the flag for players rolling
     doubleCounter = 0;  //resets how many doubles have been rolled.
-    
+
     //should roll back to 0 after the last player has gone, should work regardless of how many players
-    if(turnCounter == playerList.length) {
+    if (turnCounter == playerList.length) {
         turnCounter = 0;
     }
 
