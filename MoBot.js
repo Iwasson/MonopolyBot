@@ -175,6 +175,7 @@ async function addPlayer(arguments, receivedMessage) {
 
     player = new Object();                      //Creates a new player to be pushed to players array
     player.playerID = receivedMessage.author.id;//player id is the id of the person who called the init command
+    player.name = receivedMessage.author;
     player.money = 1500;                        //starting money for each player
     player.property = null;                     //Start with no properties
     player.piece = arguments;                   //What piece did the player pick?
@@ -261,6 +262,8 @@ function endTurn() {
     if(turnCounter == playerList.length) {
         turnCounter = 0;
     }
+
+    generalChannel.send(playerList[turnCounter].name + "'s turn!");
 }
 
 //saves the current state of the game. Useful if the bot goes down, or if discord goes down
