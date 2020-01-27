@@ -54,7 +54,7 @@ function processCommand(receivedMessage) {
             debug(arguments, receivedMessage);
             break;
         case 'roll':
-            if (turn(receivedMessage))
+            if (turn(playerList, receivedMessage))
                 rollCommand(receivedMessage);
             break;
         case 'reroll':
@@ -68,7 +68,8 @@ function processCommand(receivedMessage) {
             displayCommand(arguments);
             break;
         case 'end':
-            endTurn();
+            if(turn(receivedMessage))
+                endTurn();
             break;
         case 'stop':
             generalChannel.send("Force ending the game!");
@@ -141,7 +142,7 @@ function startCommand(arguments) {
 //  and yet lands on jail, that double is forfeited. 
 function turn(playerList, receivedMessage) {
     //check to see if it is the persons turn or not
-    if (gameStart && receivedMessage && (receivedMessage.author.id != playerList[turnCounter].id)) {
+    if (gameStart && receivedMessage && (receivedMessage.author.id != playerList[turnCounter].playerID)) {
         generalChannel.send("It is not your turn")
         return false;
     }
@@ -249,8 +250,21 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+//ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
+function endTurn() {
+    generalChannel.send("Ending your turn...");
+    ++turnCounter;      //advance the turn counter by 1
+    playerRoll = false; //resets the flag for players rolling
+    doubleCounter = 0;  //resets how many doubles have been rolled.
+    
+    //should roll back to 0 after the last player has gone, should work regardless of how many players
+    if(turnCounter == playerList.length) {
+        turnCounter = 0;
+    }
+}
+
 //saves the current state of the game. Useful if the bot goes down, or if discord goes down
-//this prevents players from starting a new game each time, especially since monopoly is such a long game
+//this prevents p   layers from starting a new game each time, especially since monopoly is such a long game
 function saveCommand(arguments) {
     myList.loadDefault();
     myList.saveGame();
