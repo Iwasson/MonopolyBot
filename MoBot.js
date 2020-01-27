@@ -26,6 +26,7 @@ client.on('message', (receivedMessage) => {
     if (receivedMessage.content.startsWith(">")) { processCommand(receivedMessage) }
 })
 
+//further parses the command that was given to determine which function needs to be called
 function processCommand(receivedMessage) {
     let fullCommand = receivedMessage.content.substr(1) //copies the command removing the first char
     let splitCommand = fullCommand.split(" ")           //splits the command, using spaces, into a command and then args
@@ -64,6 +65,7 @@ function processCommand(receivedMessage) {
     }
 }
 
+//prints out how to use the commands available
 function helpCommand(arguments) {
     if (arguments[0] != null) { arguments[0] = arguments[0].toLowerCase(); }
     switch (arguments[0]) {
@@ -88,10 +90,30 @@ function helpCommand(arguments) {
     }
 }
 
+//triggers the game to start. Function behavior changes once a game has started
+//the init command will cease to work, and only the players that have picked a piece 
+//and joined will be listened too. No other users will be able to message the bot.
 function startCommand(arguments) {
     generalChannel.send("Im Working on it dammit")
 }
 
+//controls a players turn. There are a few major parts to a turn
+//First a player must roll to see how far they can move
+//  or to see if they can get out of jail
+//Second a player will have an upkeep phase, this is paying taxes, 
+//  drawing cards, collecting money from Go  etc...
+//Third a player will have their buy/sell phase, this includes purchasing 
+//  property that they landed on, buying houses for their properties (if able)
+//  selling houses, mortgaging etc...
+//After all of these parts of their turn are over, they will end their turn,
+//  allowing the next person a turn. An expetion to this is if the player rolls doubles,
+//  at which point a player is elegible for a second turn. If the player rolls doubles
+//  and yet lands on jail, that double is forfeited. 
+function turn(player) {
+
+}
+
+//prints out relevant data to developers. Will be commented out later.
 function debug(arguments, receivedMessage) {
     generalChannel.send(JSON.stringify(playerList));
     generalChannel.send(receivedMessage.author.id);
@@ -99,8 +121,9 @@ function debug(arguments, receivedMessage) {
 
 }
 
+//adds a new player to the next game. Checks to make sure that the player has not already
+//been added as well as ensures they make a vaild piece choice.
 async function addPlayer(arguments, receivedMessage) {
-
     if (!pieces.includes(arguments[0])) {
         generalChannel.send("Error, not a valid choice. Please pick from the list below.");
         generalChannel.send(pieces);
@@ -130,6 +153,8 @@ async function addPlayer(arguments, receivedMessage) {
     generalChannel.send("Player added!")
 }
 
+//this command allows users to enter into a game of monopoly assuming one hasnt already been started. 
+//This command will check to see if they have been added to the game already, if not then allow them to choose their piece.
 function initCommand(arguments, receivedMessage) {
     if(receivedMessage == null) {return}
     if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
@@ -138,19 +163,22 @@ function initCommand(arguments, receivedMessage) {
     else {
         addPlayer(arguments, receivedMessage)
     }
-
 }
 
+//saves the current state of the game. Useful if the bot goes down, or if discord goes down
+//this prevents players from starting a new game each time, especially since monopoly is such a long game
 function saveCommand(arguments) {
     myList.loadDefault();
     myList.saveGame();
     generalChannel.send("Saved!");
 }
 
+//for debuging purposes, will be removed later
 function displayCommand(arguments) {
     myList.displayAll(generalChannel);
 }
 
+//used to get a printout of the board, it will update piece movements and house numbers.
 async function imgCommand(arguments) {
     const canvas = Canvas.createCanvas(1000, 1000);
     const ctx = canvas.getContext('2d');
@@ -169,4 +197,5 @@ async function imgCommand(arguments) {
 
 }
 
+//logs bot into the server
 client.login(auth.token)
