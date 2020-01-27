@@ -120,7 +120,7 @@ function startCommand(arguments) {
         gameStart = true;
         return;
     }
-    if (playerList < 1) {
+    if (playerList.length < 1) {
         generalChannel.send("There are no players! Try using >init to add yourself to the game!");
         return;
     }
