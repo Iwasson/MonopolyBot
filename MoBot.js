@@ -21,6 +21,7 @@ client.on('ready', () => {
     client.user.setActivity("Monopoly")
     var List = require('./CLL.js')
     myList = new List;
+    myList.loadDefault(); //will always load the default game
 })
 
 //Listens for commands from the user
@@ -43,6 +44,9 @@ function processCommand(receivedMessage) {
             break;
         case 'start':
             startCommand(arguments);
+            break;
+        case 'load':
+            loadSave();
             break;
         case 'init':
             initCommand(arguments, receivedMessage);
@@ -126,6 +130,11 @@ function startCommand(arguments) {
     }
     generalChannel.send("Starting!")
     gameStart = true;
+}
+
+function loadSave() {
+    generalChannel.send("Loading previous save...");
+    myList.loadCurrent();
 }
 
 //controls a players turn. There are a few major parts to a turn
@@ -253,6 +262,11 @@ function getRandomInt(min, max) {
 
 //ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
 function endTurn() {
+    if(playerRoll == false) {
+        generalChannel.send("You haven't rolled yet!");
+        return;
+    }
+    
     generalChannel.send("Ending your turn...");
     ++turnCounter;      //advance the turn counter by 1
     playerRoll = false; //resets the flag for players rolling
@@ -269,7 +283,6 @@ function endTurn() {
 //saves the current state of the game. Useful if the bot goes down, or if discord goes down
 //this prevents p   layers from starting a new game each time, especially since monopoly is such a long game
 function saveCommand(arguments) {
-    myList.loadDefault();
     myList.saveGame();
     generalChannel.send("Saved!");
 }
@@ -297,8 +310,6 @@ async function imgCommand(arguments) {
     generalChannel.send(attachment);
 
 }
-
-
 
 //logs bot into the server
 client.login(auth.token)
