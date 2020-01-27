@@ -4,12 +4,15 @@ const client = new Discord.Client()             //create a new discord client fo
 
 const Canvas = require('canvas')                //used to draw on images
 const { createCanvas, loadImage } = require('canvas')
-const Roll = require('./roll.js')
 
 var player;                                     //define struct
 var playerList = []                             //hold the players for game
 var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use 
+
+var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
+var playerRoll = false;                         //flag to see if the player has rolled or not. False means they have not rolled yet, true means they have rolled
+var doubleCounter = 0;                                //used to see how many times you have rolled doubles
 
 //when the bot is initialized call the other files
 client.on('ready', () => {
@@ -51,13 +54,25 @@ function processCommand(receivedMessage) {
             debug(arguments, receivedMessage);
             break;
         case 'roll':
-            rollCommand(arguments);
+            if (turn(receivedMessage))
+                rollCommand(receivedMessage);
+            break;
+        case 'reroll':
+            generalChannel.send("Reseting roll");
+            playerRoll = false;
             break;
         case 'save':
             saveCommand(arguments);
             break;
         case 'display':
             displayCommand(arguments);
+            break;
+        case 'end':
+            endTurn();
+            break;
+        case 'stop':
+            generalChannel.send("Force ending the game!");
+            gameStart = false;
             break;
         default:
             generalChannel.send("I don't understand the request")
@@ -94,7 +109,22 @@ function helpCommand(arguments) {
 //the init command will cease to work, and only the players that have picked a piece 
 //and joined will be listened too. No other users will be able to message the bot.
 function startCommand(arguments) {
-    generalChannel.send("Im Working on it dammit")
+    //for testing only, shall be removed later
+    if (arguments[0] == 'override') {
+        generalChannel.send("As you wish, starting");
+        gameStart = true;
+        return;
+    }
+    if (playerList < 1) {
+        generalChannel.send("There are no players! Try using >init to add yourself to the game!");
+        return;
+    }
+    else if (playerList.length < 2) {
+        generalChannel.send("It would be rather lonely playing a game of Monopoly by yourself, maybe see if anyone else wants to join you first?")
+        return;
+    }
+    generalChannel.send("Starting!")
+    gameStart = true;
 }
 
 //controls a players turn. There are a few major parts to a turn
@@ -109,8 +139,20 @@ function startCommand(arguments) {
 //  allowing the next person a turn. An expetion to this is if the player rolls doubles,
 //  at which point a player is elegible for a second turn. If the player rolls doubles
 //  and yet lands on jail, that double is forfeited. 
-function turn(player) {
-
+function turn(playerList, receivedMessage) {
+    //check to see if it is the persons turn or not
+    if (gameStart && receivedMessage && (receivedMessage.author.id != playerList[turnCounter].id)) {
+        generalChannel.send("It is not your turn")
+        return false;
+    }
+    else if (gameStart == false) {
+        generalChannel.send("There is no game running.");
+        return false;
+    }
+    else {
+        generalChannel.send("Valid turn");
+        return true;
+    }
 }
 
 //prints out relevant data to developers. Will be commented out later.
@@ -118,7 +160,7 @@ function debug(arguments, receivedMessage) {
     generalChannel.send(JSON.stringify(playerList));
     generalChannel.send(receivedMessage.author.id);
     generalChannel.send(pieces.toString());
-
+    generalChannel.send(gameStart);
 }
 
 //adds a new player to the next game. Checks to make sure that the player has not already
@@ -156,13 +198,55 @@ async function addPlayer(arguments, receivedMessage) {
 //this command allows users to enter into a game of monopoly assuming one hasnt already been started. 
 //This command will check to see if they have been added to the game already, if not then allow them to choose their piece.
 function initCommand(arguments, receivedMessage) {
-    if(receivedMessage == null) {return}
+    if (gameStart == true) {
+        generalChannel.send("A game is already in progress.");
+        return;
+    }
+
+    if (receivedMessage == null) { return }
     if (playerList.find(({ playerID }) => playerID === receivedMessage.author.id)) {
         generalChannel.send("Player already added")
     }
     else {
         addPlayer(arguments, receivedMessage)
     }
+}
+
+function rollCommand(receivedMessage) {
+    if (playerRoll == true) {
+        generalChannel.send("You have already rolled!");
+        return;
+    }
+
+    generalChannel.send("You roll the die...");
+
+    //two die are rolled to better skew the odds of rolling some numbers
+    //over others. Two die have a greater chance to roll 7 than a number generator
+    //picking between 1 and 12
+    var die1 = getRandomInt(1, 7);
+    var die2 = getRandomInt(1, 7);
+    var result = die1 + die2;
+
+    if (die1 == die2) {
+        generalChannel.send("You Rolled: " + die1 + " & " + die2 + "\nfor a total of: " + result + "\nDoubles!");
+        ++doubleCounter;
+    }
+    else {
+        generalChannel.send("You Rolled: " + die1 + " & " + die2 + "\nfor a total of: " + result);
+        playerRoll = true;
+    }
+    if (doubleCounter > 2) {
+        generalChannel.send("Doubles three times in a row!? Clearly you must be cheating! To jail with you!");
+        playerRoll = true;
+    }
+    return;
+}
+
+//generates a random number between 1 and 7
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
 //saves the current state of the game. Useful if the bot goes down, or if discord goes down
@@ -196,6 +280,8 @@ async function imgCommand(arguments) {
     generalChannel.send(attachment);
 
 }
+
+
 
 //logs bot into the server
 client.login(auth.token)

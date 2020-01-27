@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
-exports.rollCommand = function rollCommand(arguments, receivedMessage, counter, generalChannel) {
+exports.rollCommand = function rollCommand(receivedMessage, counter, generalChannel) {
     //let generalChannel = client.channels.get("664325321876832258")
     var die1 = getRandomInt(1, 7)
     var die2 = getRandomInt(1, 7)
@@ -19,7 +19,7 @@ exports.rollCommand = function rollCommand(arguments, receivedMessage, counter, 
         else {
             generalChannel.send("Doubles! Rolling again...");
             ++counter;
-            result += rollCommand(arguments, receivedMessage, counter, generalChannel)
+            result += rollCommand(receivedMessage, counter, generalChannel)
         }
     }
     return result;
