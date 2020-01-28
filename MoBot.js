@@ -59,7 +59,7 @@ function processCommand(receivedMessage) {
             break;
         case 'roll':
             if (turn(playerList, receivedMessage))
-                playerList[turnCounter].pos = rollCommand(receivedMessage);
+                playerList[turnCounter].pos += rollCommand(receivedMessage);
             break;
         case 'reroll':
             generalChannel.send("Reseting roll");
@@ -249,7 +249,8 @@ function rollCommand(receivedMessage) {
     if (doubleCounter > 2) {
         generalChannel.send("Doubles three times in a row!? Clearly you must be cheating! To jail with you!");
         playerRoll = true;
-        return 11;
+        playerList[turnCounter].pos = 11;
+        return;
     }
     else {
         return result;
