@@ -9,3 +9,7 @@ NPM installs
 ===================
 ->discord.js<br>
 ->canvas
+
+TODO
+===================
+-[ ] Add images to the player peices instead of colors.
