@@ -103,6 +103,10 @@ function processCommand(receivedMessage) {
             if (turn(playerList, receivedMessage))
                 rollCommand(receivedMessage);
             break;
+        case 'bail':
+            if(turn(playerList, receivedMessage))
+                bailCommand(receivedMessage);
+            break;
         case 'reroll':
             generalChannel.send("Reseting roll");
             playerRoll = false;
@@ -187,19 +191,7 @@ function loadSave() {
         }
     });
 }
-
-//controls a players turn. There are a few major parts to a turn
-//First a player must roll to see how far they can move
-//  or to see if they can get out of jail
-//Second a player will have an upkeep phase, this is paying taxes, 
-//  drawing cards, collecting money from Go  etc...
-//Third a player will have their buy/sell phase, this includes purchasing 
-//  property that they landed on, buying houses for their properties (if able)
-//  selling houses, mortgaging etc...
-//After all of these parts of their turn are over, they will end their turn,
-//  allowing the next person a turn. An expetion to this is if the player rolls doubles,
-//  at which point a player is elegible for a second turn. If the player rolls doubles
-//  and yet lands on jail, that double is forfeited. 
+ 
 function turn(playerList, receivedMessage) {
     //check to see if it is the persons turn or not
     if (gameStart && receivedMessage && (receivedMessage.author.id != playerList[turnCounter].playerID)) {
@@ -240,7 +232,8 @@ async function addPlayer(arguments, receivedMessage) {
     player.money = 1500;                        //starting money for each player
     player.property = null;                     //Start with no properties
     player.piece = arguments;                   //What piece did the player pick?
-    player.pos = 0;
+    player.pos = 0;                             //stores the location of the player
+    player.jail = 0;                            //set to 3 when sent to jail, decrement by 1 each turn they dont leave
     player.number = playerList.length;
     playerList.push(player);
     if (arguments == "car") {
@@ -293,6 +286,9 @@ function rollCommand(receivedMessage) {
     if (die1 == die2) {
         generalChannel.send("You Rolled: " + die1 + " & " + die2 + "\nfor a total of: " + result + "\nDoubles!");
         ++doubleCounter;
+        if(playerList[turnCounter].jail > 0) {
+            playerList[turnCounter].jail = 0;
+        }
     }
     else {
         generalChannel.send("You Rolled: " + die1 + " & " + die2 + "\nfor a total of: " + result);
@@ -302,13 +298,52 @@ function rollCommand(receivedMessage) {
         generalChannel.send("Doubles three times in a row!? Clearly you must be cheating! To jail with you!");
         playerRoll = true;
         playerList[turnCounter].pos = 10;
+        playerList[turnCounter].jail = 3;
         return;
+    }
+    //if the player is in jail, then they need to not move and decrement counter by 1
+    else if (playerList[turnCounter].jail > 0) {
+        if(playerList[turnCounter].jail == 1) {
+            generalChannel.send("You've been in jail for 3 turns! You must pay $50 to get out!");
+            playerList[turnCounter].money -= 50;
+            playerList[turnCounter].pos += result;
+        }
+        else {
+            generalChannel.send("You sit in jail for another turn!");
+            playerList[turnCounter].jail -= 1;
+        }
     }
     else {
         playerList[turnCounter].pos += result;
+
+        //check if they have passed go, give $200
         if(playerList[turnCounter].pos > 39) {
             playerList[turnCounter].pos = playerList[turnCounter].pos % 40;
             playerList[turnCounter].money += 200;
+        }
+        //land on community chest
+        if(playerList[turnCounter].pos == 2 || playerList[turnCounter].pos == 17 || playerList[turnCounter].pos == 33) {
+
+        }
+        //land on chance
+        if(playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
+
+        }
+        //income tax
+        if(playerList[turnCounter].pos == 4) {
+            generalChannel.send("You've landed on income tax! Pay $200!");
+            playerList[turnCounter].money -= 200;
+        }
+        //luxury tax
+        if(playerList[turnCounter].pos == 38) {
+            generalChannel.send("You've landed on luxury tax! Pay $100!");
+            playerList[turnCounter].money -= 100;
+        }
+        //go to jail
+        if(playerList[turnCounter].pos == 30) {
+            generalChannel.send("You've landed on Go to Jail! Go straight to jail!");
+            playerList[turnCounter].pos = 10;
+            playerList[turnCounter].jail = 3;
         }
     }
 }
