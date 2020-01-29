@@ -101,7 +101,7 @@ function processCommand(receivedMessage) {
             break;
         case 'roll':
             if (turn(playerList, receivedMessage))
-                playerList[turnCounter].pos += rollCommand(receivedMessage);
+                rollCommand(receivedMessage);
             break;
         case 'reroll':
             generalChannel.send("Reseting roll");
@@ -301,11 +301,15 @@ function rollCommand(receivedMessage) {
     if (doubleCounter > 2) {
         generalChannel.send("Doubles three times in a row!? Clearly you must be cheating! To jail with you!");
         playerRoll = true;
-        playerList[turnCounter].pos = 11;
+        playerList[turnCounter].pos = 10;
         return;
     }
     else {
-        return result;
+        playerList[turnCounter].pos += result;
+        if(playerList[turnCounter].pos > 39) {
+            playerList[turnCounter].pos = playerList[turnCounter].pos % 40;
+            playerList[turnCounter].money += 200;
+        }
     }
 }
 
