@@ -119,6 +119,16 @@ class List {
         }
     }
 
+    savePlayer(players) {
+        var fs = require('fs');
+        var jsonData = JSON.stringify(players);
+        fs.writeFile("players.json", jsonData, function(err) {
+            if(err) {
+                console.log(err);
+            }
+        });
+    }
+
     displayAll(generalChannel) {
     
         if (this.head == null) {

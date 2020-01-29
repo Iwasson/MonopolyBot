@@ -12,8 +12,50 @@ var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
 var playerRoll = false;                         //flag to see if the player has rolled or not. False means they have not rolled yet, true means they have rolled
-var doubleCounter = 0;                                //used to see how many times you have rolled doubles
-
+var doubleCounter = 0;                          //used to see how many times you have rolled doubles
+var middleLen = (1450/9)
+var RBmiddle = (1950-middleLen); 
+var boardCoords = [ [RBmiddle, RBmiddle],
+[1600 - (middleLen * 0), RBmiddle],
+[1600 - (middleLen * 1), RBmiddle],
+[1600 - (middleLen * 2), RBmiddle],
+[1600 - (middleLen * 3), RBmiddle],
+[1600 - (middleLen * 4), RBmiddle],
+[1600 - (middleLen * 5), RBmiddle],
+[1600 - (middleLen * 6), RBmiddle],
+[1600 - (middleLen * 7), RBmiddle],
+[1600 - (middleLen * 8), RBmiddle],
+[middleLen - 50, RBmiddle],
+[middleLen - 50, 1600 - (middleLen * 0)],
+[middleLen - 50, 1600 - (middleLen * 1)],
+[middleLen - 50, 1600 - (middleLen * 2)],
+[middleLen - 50, 1600 - (middleLen * 3)],
+[middleLen - 50, 1600 - (middleLen * 4)],
+[middleLen - 50, 1600 - (middleLen * 5)],
+[middleLen - 50, 1600 - (middleLen * 6)],
+[middleLen - 50, 1600 - (middleLen * 7)],
+[middleLen - 50, 1600 - (middleLen * 8)],
+[middleLen - 50, middleLen - 50],
+[300 + (middleLen * 0), middleLen - 50],
+[300 + (middleLen * 1), middleLen - 50],
+[300 + (middleLen * 2), middleLen - 50],
+[300 + (middleLen * 3), middleLen - 50],
+[300 + (middleLen * 4), middleLen - 50],
+[300 + (middleLen * 5), middleLen - 50],
+[300 + (middleLen * 6), middleLen - 50],
+[300 + (middleLen * 7), middleLen - 50],
+[300 + (middleLen * 8), middleLen - 50],
+[RBmiddle, middleLen - 50],
+[RBmiddle + 50, 300 + (middleLen * 0)],
+[RBmiddle + 50, 300 + (middleLen * 1)],
+[RBmiddle + 50, 300 + (middleLen * 2)],
+[RBmiddle + 50, 300 + (middleLen * 3)],
+[RBmiddle + 50, 300 + (middleLen * 4)],
+[RBmiddle + 50, 300 + (middleLen * 5)],
+[RBmiddle + 50, 300 + (middleLen * 6)],
+[RBmiddle + 50, 300 + (middleLen * 7)],
+[RBmiddle + 50, 300 + (middleLen * 8)],
+]
 //when the bot is initialized call the other files
 client.on('ready', () => {
     generalChannel = client.channels.get("664325321876832258"); //general channel for testing purposes WILL NEED TO NOT HARD CODE
@@ -135,6 +177,15 @@ function startCommand(arguments) {
 function loadSave() {
     generalChannel.send("Loading previous save...");
     myList.loadCurrent();
+    var fs = require('fs');
+    fs.readFile("players.json", 'utf-8', function(err, data) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            playerList = JSON.parse(data)
+        }
+    });
 }
 
 //controls a players turn. There are a few major parts to a turn
@@ -171,6 +222,7 @@ function debug(arguments, receivedMessage) {
     generalChannel.send(receivedMessage.author.id);
     generalChannel.send(pieces.toString());
     generalChannel.send(gameStart);
+    generalChannel.send(boardCoords);
 }
 
 //adds a new player to the next game. Checks to make sure that the player has not already
@@ -288,6 +340,7 @@ function endTurn() {
 //this prevents p   layers from starting a new game each time, especially since monopoly is such a long game
 function saveCommand(arguments) {
     myList.saveGame();
+    myList.savePlayer(playerList);
     generalChannel.send("Saved!");
 }
 
@@ -298,17 +351,18 @@ function displayCommand(arguments) {
 
 //used to get a printout of the board, it will update piece movements and house numbers.
 async function imgCommand(arguments) {
-    const canvas = Canvas.createCanvas(1000, 1000);
+    const canvas = Canvas.createCanvas(1950, 1950);
     const ctx = canvas.getContext('2d');
     const background = await Canvas.loadImage('./assets/Board.jpg');
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
     ctx.strokeStyle = '#74037b';
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
-    //const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
+    const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
+    ctx.drawImage(avatar, boardCoords[0][0], boardCoords[0][1], 50, 50)
 
     const attachment = new Discord.Attachment(canvas.toBuffer());
     generalChannel.send(attachment);
