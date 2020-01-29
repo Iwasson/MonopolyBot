@@ -222,7 +222,7 @@ function debug(arguments, receivedMessage) {
     generalChannel.send(receivedMessage.author.id);
     generalChannel.send(pieces.toString());
     generalChannel.send(gameStart);
-    generalChannel.send(boardCoords);
+    //generalChannel.send(boardCoords);
 }
 
 //adds a new player to the next game. Checks to make sure that the player has not already
