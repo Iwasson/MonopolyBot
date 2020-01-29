@@ -118,6 +118,7 @@ class List {
             })
         }
     }
+
     savePlayer(players) {
         var fs = require('fs');
         var jsonData = JSON.stringify(players);
@@ -125,8 +126,8 @@ class List {
             if(err) {
                 console.log(err);
             }
-    });
-}
+        });
+    }
 
     displayAll(generalChannel) {
     
