@@ -182,7 +182,7 @@ function helpCommand(arguments) {
             generalChannel.send("Loads a saved game");
             break;
         default:
-            generalChannel.send("List of Commands: \nInit\nStart\nRoll\nSave\nLoad")
+            generalChannel.send("List of Commands: \nBail\tBuy\nDebug\tDeeds\nDisplay\tEnd\nHelp\tImg\nInit\tInspect\nLoad\tMortgage\nPoke\tReroll\nRoll\tSave\nSell\tStart\nStop\tUnmortgage")
             break;
     }
 }
