@@ -392,6 +392,26 @@ class List {
         return deeds;
     }
 
+    groupMortgaged(deedName) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        var groupId = getGroup(deedName);
+        this.current = this.head;
+
+        do {
+            if(this.current.group == groupId) {
+                if(this.current.mortgaged == true) {
+                    return true;
+                }
+            }
+        } while(this.current != this.head);
+
+        return false;
+    }
+
     //mortgages a property
     mortgage(deedName) {
         if (this.head == null) {

@@ -519,9 +519,15 @@ function buyCommand(arguments) {
                             return;
                         }
                         else {
+                            if(myList.groupMortgaged(property[1]) == false) {
                             myList.buyHome(property[1]);
                             generalChannel.send("You have bought a house on " + property[1] + " for $" + myList.getTitle(playerList[turnCounter].pos).priceH);
                             return;
+                            }
+                            else {
+                                generalChannel.send("You can't buy a house while one of your properties is mortgaged!");
+                                return;
+                            }
                         }
                     }
                     else {
