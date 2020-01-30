@@ -355,6 +355,16 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+function bailCommand(receivedMessage) {
+    if(playerList[turnCounter].jail > 0) {
+        generalChannel.send("You have paid your bail! -$50");
+        playerList[turnCounter].money -= 50;
+    }
+    else {
+        generalChannel.send("You are not currently in jail!");
+    }
+}
+
 //ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
 function endTurn() {
     if (playerRoll == false) {
