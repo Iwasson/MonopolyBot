@@ -13,9 +13,9 @@ var turnCounter = 0;                            //holds which players turn it cu
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
 var playerRoll = false;                         //flag to see if the player has rolled or not. False means they have not rolled yet, true means they have rolled
 var doubleCounter = 0;                          //used to see how many times you have rolled doubles
-var middleLen = (1450/9)
-var RBmiddle = (1950-middleLen); 
-var boardCoords = [ [RBmiddle, RBmiddle],
+var middleLen = (1450 / 9)
+var RBmiddle = (1950 - middleLen);
+var boardCoords = [[RBmiddle, RBmiddle],
 [1600 - (middleLen * 0), RBmiddle],
 [1600 - (middleLen * 1), RBmiddle],
 [1600 - (middleLen * 2), RBmiddle],
@@ -104,18 +104,18 @@ function processCommand(receivedMessage) {
                 rollCommand(receivedMessage);
             break;
         case 'inspect':
-            if(turn(playerList, receivedMessage))
+            if (turn(playerList, receivedMessage))
                 inspectCommand();
             break;
         case 'bail':
-            if(turn(playerList, receivedMessage))
+            if (turn(playerList, receivedMessage))
                 bailCommand(receivedMessage);
             break;
         case 'deeds':
             deedCommand(receivedMessage);
             break;
         case 'buy':
-            if(turn(playerList, receivedMessage))
+            if (turn(playerList, receivedMessage))
                 buyCommand(arguments);
             break;
         case 'reroll':
@@ -193,7 +193,7 @@ function loadSave() {
     generalChannel.send("Loading previous save...");
     myList.loadCurrent();
     var fs = require('fs');
-    fs.readFile("players.json", 'utf-8', function(err, data) {
+    fs.readFile("players.json", 'utf-8', function (err, data) {
         if (err) {
             console.log(err);
         }
@@ -202,7 +202,7 @@ function loadSave() {
         }
     });
 }
- 
+
 function turn(playerList, receivedMessage) {
     //check to see if it is the persons turn or not
     if (gameStart && receivedMessage && (receivedMessage.author.id != playerList[turnCounter].playerID)) {
@@ -297,7 +297,7 @@ function rollCommand(receivedMessage) {
     if (die1 == die2) {
         generalChannel.send("You Rolled: " + die1 + " & " + die2 + "\nfor a total of: " + result + "\nDoubles!");
         ++doubleCounter;
-        if(playerList[turnCounter].jail > 0) {
+        if (playerList[turnCounter].jail > 0) {
             playerList[turnCounter].jail = 0;
         }
     }
@@ -314,7 +314,7 @@ function rollCommand(receivedMessage) {
     }
     //if the player is in jail, then they need to not move and decrement counter by 1
     else if (playerList[turnCounter].jail > 0) {
-        if(playerList[turnCounter].jail == 1) {
+        if (playerList[turnCounter].jail == 1) {
             generalChannel.send("You've been in jail for 3 turns! You must pay $50 to get out!");
             playerList[turnCounter].money -= 50;
             playerList[turnCounter].pos += result;
@@ -329,31 +329,31 @@ function rollCommand(receivedMessage) {
         inspectCommand();
 
         //check if they have passed go, give $200
-        if(playerList[turnCounter].pos > 39) {
+        if (playerList[turnCounter].pos > 39) {
             generalChannel.send("You have passed GO! Get $200!")
             playerList[turnCounter].pos = playerList[turnCounter].pos % 40;
             playerList[turnCounter].money += 200;
         }
         //land on community chest
-        if(playerList[turnCounter].pos == 2 || playerList[turnCounter].pos == 17 || playerList[turnCounter].pos == 33) {
+        if (playerList[turnCounter].pos == 2 || playerList[turnCounter].pos == 17 || playerList[turnCounter].pos == 33) {
 
         }
         //land on chance
-        if(playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
+        if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
 
         }
         //income tax
-        if(playerList[turnCounter].pos == 4) {
+        if (playerList[turnCounter].pos == 4) {
             generalChannel.send("You've landed on income tax! Pay $200!");
             playerList[turnCounter].money -= 200;
         }
         //luxury tax
-        if(playerList[turnCounter].pos == 38) {
+        if (playerList[turnCounter].pos == 38) {
             generalChannel.send("You've landed on luxury tax! Pay $100!");
             playerList[turnCounter].money -= 100;
         }
         //go to jail
-        if(playerList[turnCounter].pos == 30) {
+        if (playerList[turnCounter].pos == 30) {
             generalChannel.send("You've landed on Go to Jail! Go straight to jail!");
             playerList[turnCounter].pos = 10;
             playerList[turnCounter].jail = 3;
@@ -373,27 +373,27 @@ function inspectCommand() {
     generalChannel.send("You are on: " + tempTile.title);
 
     ownable = playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 10 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 20 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
-    
+
     //only list info for player ownable tiles
-    if(tempTile.owner == "null" && ownable) {
+    if (tempTile.owner == "null" && ownable) {
         generalChannel.send("This plot is unowned! \nYou can buy it for: " + tempTile.price);
     }
-    else if(ownable) {
+    else if (ownable) {
         generalChannel.send("This plot is owned by: " + tempTile.owner + "\nThere are " + tempTile.houses + " houses on this plot.");
-        if(tempTile.houses > 0) {
-            if(tempTile.houses == 1) {
+        if (tempTile.houses > 0) {
+            if (tempTile.houses == 1) {
                 generalChannel.send("The rent is: " + tempTile.rent1);
             }
-            if(tempTile.houses == 2) {
+            if (tempTile.houses == 2) {
                 generalChannel.send("The rent is: " + tempTile.rent2);
             }
-            if(tempTile.houses == 3) {
+            if (tempTile.houses == 3) {
                 generalChannel.send("The rent is: " + tempTile.rent3);
             }
-            if(tempTile.houses == 4) {
+            if (tempTile.houses == 4) {
                 generalChannel.send("The rent is: " + tempTile.rent4);
             }
-            if(tempTile.houses == 5) {
+            if (tempTile.houses == 5) {
                 generalChannel.send("The rent is: " + tempTile.rentH);
             }
         }
@@ -403,33 +403,37 @@ function inspectCommand() {
     }
 }
 
+function sellCommand(arguments) {
+
+}
+
 function buyCommand(arguments) {
-    if(arguments.length == 0) {
+    if (arguments.length == 0) {
         generalChannel.send("What would you like to buy? (Buy deed) or (Buy house)");
         return;
     }
     tempTile = myList.getTitle(playerList[turnCounter].pos);
 
-    if(arguments[0].toLowerCase() == "house") {
+    if (arguments[0].toLowerCase() == "house") {
         //will need to check to see if a player owns all of the deeds in a group
         //will need to check to see if the houses are being built correctly
         //check to see if the player has any deeds
-        if(myList.getDeeds(playerList[turnCounter].name) == "") {
+        if (myList.getDeeds(playerList[turnCounter].name) == "") {
             generalChannel.send("You don't have any properties to build houses on!");
             return;
         }
-        if(arguments[1] == null) {
+        if (arguments[1] == null) {
             generalChannel.send("Which property would you like to build a house on? (ex. >buy house 1) \n" + myList.getDeeds(playerList[turnCounter].name));
         }
         //if they send in a second argument 
         else {
             //check to see if they sent in a number
-            if(is_numeric(arguments[2])) {
+            if (is_numeric(arguments[2])) {
                 var choice = parseInt(arguments[2]); //store the number in int form
                 var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
 
                 //check to see if the option they provided is greater than the possible options
-                if(choice > options.length + 1) {
+                if (choice > options.length + 1) {
                     generalChannel.send("Thats not a valid option.");
                 }
                 //choice is valid, so see if they have all of the properties in that group
@@ -437,8 +441,8 @@ function buyCommand(arguments) {
                     var property = options[choice].split(" "); //extract the name of the deed
                     //if they have the whole group, then check to see if they are trying to build without balancing
                     //cll will take care of that
-                    if(myList.hasGroup(property[1], playerList[turnCounter].name)) {
-                        if(myList.getTitle(playerList[turnCounter].pos).priceH > playerList[turnCounter].money) {
+                    if (myList.hasGroup(property[1], playerList[turnCounter].name)) {
+                        if (myList.getTitle(playerList[turnCounter].pos).priceH > playerList[turnCounter].money) {
                             generalChannel.send("You can't afford to buy a house on that property!");
                             return;
                         }
@@ -457,16 +461,16 @@ function buyCommand(arguments) {
         }
 
     }
-    else if(arguments[0].toLowerCase() == "deed") {
+    else if (arguments[0].toLowerCase() == "deed") {
         //check to see if they already own the tile
-        if(tempTile.owner == playerList[turnCounter].name) {
+        if (tempTile.owner == playerList[turnCounter].name) {
             generalChannel.send("You already own this tile!");
         }
-        else if(tempTile.owner != "null") {
+        else if (tempTile.owner != "null") {
             generalChannel.send("Someone else already owns this tile!")
         }
         else {
-            if(playerList[turnCounter].money < tempTile.price) {
+            if (playerList[turnCounter].money < tempTile.price) {
                 generalChannel.send("You don't have enough money to buy that!");
             }
             else {
@@ -478,11 +482,11 @@ function buyCommand(arguments) {
     }
     else {
         generalChannel.send("I can't understand the request, try \"Buy Deed\" or \"Buy House\"");
-    } 
+    }
 }
 
 function bailCommand(receivedMessage) {
-    if(playerList[turnCounter].jail > 0) {
+    if (playerList[turnCounter].jail > 0) {
         generalChannel.send("You have paid your bail! -$50");
         playerList[turnCounter].money -= 50;
     }
