@@ -520,10 +520,10 @@ function buyCommand(arguments) {
                             return;
                         }
                         else {
-                            if(myList.groupMortgaged(property[1]) == false) {
-                            myList.buyHome(property[1]);
-                            generalChannel.send("You have bought a house on " + property[1] + " for $" + myList.getTitle(playerList[turnCounter].pos).priceH);
-                            return;
+                            if (myList.groupMortgaged(property[1]) == false) {
+                                myList.buyHome(property[1]);
+                                generalChannel.send("You have bought a house on " + property[1] + " for $" + myList.getTitle(playerList[turnCounter].pos).priceH);
+                                return;
                             }
                             else {
                                 generalChannel.send("You can't buy a house while one of your properties is mortgaged!");
@@ -709,7 +709,7 @@ function displayCommand(arguments) {
 }
 
 //used to get a printout of the board, it will update piece movements and house numbers.
-async function imgCommand(arguments,) {
+async function imgCommand(arguments, ) {
     const canvas = Canvas.createCanvas(1950, 1950);
     const ctx = canvas.getContext('2d');
     const background = await Canvas.loadImage('./assets/Board.jpg');
@@ -721,21 +721,30 @@ async function imgCommand(arguments,) {
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
-    for (var i = 0; i<playerList.length; ++i)
-    {
+    for (var i = 0; i < playerList.length; ++i) {
         ctx.drawImage(playerList[i].piece, boardCoords[playerList[i].pos][0], boardCoords[playerList[i].pos][1], 50, 50);
     }
     const attachment = new Discord.Attachment(canvas.toBuffer());
     generalChannel.send(attachment);
 }
 
-function pokeCommand(){
+function pokeCommand() {
     generalChannel.send("Hey, " + playerList[turnCounter].name + " it is your turn...");
 }
 
 //loads the flavor text for all of the cards into the discard pile in order. 
 function loadCards() {
-
+    var fs = require('fs');
+    //read community chest file
+    var textByLine = fs.readFileSync('assets/CommunityChest.txt').toString().split("\n");
+    textByLine.forEach(element => {
+        comDiscard.push(element);
+    });
+    //read chance file
+    textByLine = fs.readFileSync('assets/Chance.txt').toString().split("\n");
+    textByLine.forEach(element => {
+        chanceDiscard.push(element);
+    });
 }
 
 //will reshuffle the cards from discard into the draw pile randomly
@@ -743,5 +752,6 @@ function loadCards() {
 function shuffleDeck(deckNum) {
 
 }
+
 //logs bot into the server
 client.login(auth.token)
