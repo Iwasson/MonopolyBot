@@ -103,6 +103,10 @@ function processCommand(receivedMessage) {
             if (turn(playerList, receivedMessage))
                 rollCommand(receivedMessage);
             break;
+        case 'inspect':
+            if(turn(playerList, receivedMessage))
+                inspectCommand(receivedMessage);
+            break;
         case 'bail':
             if(turn(playerList, receivedMessage))
                 bailCommand(receivedMessage);
@@ -353,6 +357,10 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+function inspectCommand(receivedMessage) {
+    generalChannel.send("You are on: " + myList[playerList[turnCounter].pos].title);
 }
 
 function bailCommand(receivedMessage) {
