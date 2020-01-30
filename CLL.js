@@ -145,6 +145,180 @@ class List {
         return deeds;
     }
 
+    //returns the group number for a given deed
+    getGroup(deedName) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        do {
+            if(this.current.title == deedName) {
+                return this.current.group;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+    }
+
+    //parses the list, finds the deed with the proper name, gets the group number and looks 
+    //to see if the player owns all of them
+    hasGroup(deedName, player) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+        var groupId = getGroup(deedName);
+
+        if(groupId == "null") {
+            return false;
+        }
+
+        var owned = 0;
+
+        //now parse a second time to see if they own all of that group
+        //current should already be set to head
+        do {
+            //if the tile is part of the group
+            if(this.current.group == groupId) {
+                //if the player owns it, then increment owned, if owned is 2 for the two groups 1 and 8 or 3 for the others, then they can buy houses
+                if(this.current.owner == player) {
+                    owned += 1;
+                }
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+
+        if((groupId == 1 || groupId == 8) && (owned == 2)) {
+            return true;
+        }
+        else if(owned == 3) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    //attempts to buy a house, assume hasGroup has already been called
+    //will not check to see if one person owns all of the deeds in a group 
+    buyHome(deedName) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        //check all of the deeds in a group, if the deed that they are trying to build
+        //a house on would put it at 2 more houses than another, reject the request.
+        var groupDeeds;
+        var count = 0;
+        var h1 = 0; //deed player wants to buy a house on
+        var h2 = 0;
+        var h3 = 0; 
+        var choice;
+        var groupId = getGroup(deedName);
+        this.current = this.head;
+
+        if(groupId == "null" || groupId > 8) {
+            console.log("Attempted to buy a non ownable space");
+            generalChannel.send("You can't build a house on that!");
+            return false;
+        }
+
+        //stick all of the deeds that are part of a group into one array
+        do {
+            if(this.current.group == groupId) {
+                groupDeeds += this.current;
+            }
+            if(this.current.title == deedName) {
+                choice = count;
+            }
+            count += 1;
+            this.current = this.current.next;
+        } while(this.current != this.head);
+
+        //we now have an array of all of the deeds in a group
+        //check if placing one house on the desired deed will 
+        //make the request invalid
+        
+        //need to check two different cases
+        //these are the two groups that have only two deeds
+        if(groupId == 1 || groupId == 8) {
+            //check to see if placing 1 house will upset the balance
+            if(choice == 0) {
+                h1 = groupDeeds[0];
+                h2 = groupDeeds[1];
+            }
+            else {
+                h1 = groupDeeds[1];
+                h2 = groupDeeds[0];
+            }
+
+            //you can buy if they have the same number of houses or if the choice has less than the other
+            if(h1.houses == h2.houses || h1.houses < h2.houses) {
+                setHouseCount(deedName);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        //all other deeds that you can buy houses on
+        else {
+            //can only build if each of the deeds has the same number of houses
+            //or if the deed has less than the deed with the most houses on it
+            //ex. deed 1 has 0 houses deed 2 has 1 house deed 3 has 1 house 
+            //      you can build on deed 1 but not the other two
+            if(choice == 0) {
+                h1 = groupDeeds[0];
+                h2 = groupDeeds[1];
+                h3 = groupDeeds[2];
+            }
+            if(choice == 1) {
+                h1 = groupDeeds[1];
+                h2 = groupDeeds[2];
+                h3 = groupDeeds[0];
+            }
+            if(choice == 2) {
+                h1 = groupDeeds[2];
+                h2 = groupDeeds[0];
+                h3 = groupDeeds[1];
+            }
+
+            //if they all have equal amounts of houses on them, buy a home
+            if(h1.houses == h2.houses && h1.houses == h3.houses) {
+                setHouseCount(deedName);
+                return true;
+            }
+            else if((h1.houses + 1 <= h2.houses) && (h1.houses + 1 <= h3.houses)) {
+                setHouseCount(deedName);
+                return true;
+            }
+
+        }
+    }
+
+    //builds one house on a specific deed
+    setHouseCount(deedName) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        do {
+            if(this.current.title == deedName) {
+                this.current.houses += 1;
+                return;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+    }
+
     savePlayer(players) {
         var fs = require('fs');
         var jsonData = JSON.stringify(players);

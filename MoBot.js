@@ -419,10 +419,41 @@ function buyCommand(arguments) {
             return;
         }
         if(arguments[1] == null) {
-            generalChannel.send("Which property would you like to build a house on? \n" + myList.getDeeds(playerList[turnCounter].name));
+            generalChannel.send("Which property would you like to build a house on? (ex. >buy house 1) \n" + myList.getDeeds(playerList[turnCounter].name));
         }
+        //if they send in a second argument 
         else {
-            
+            //check to see if they sent in a number
+            if(is_numeric(arguments[2])) {
+                var choice = parseInt(arguments[2]); //store the number in int form
+                var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
+
+                //check to see if the option they provided is greater than the possible options
+                if(choice > options.length + 1) {
+                    generalChannel.send("Thats not a valid option.");
+                }
+                //choice is valid, so see if they have all of the properties in that group
+                else {
+                    var property = options[choice].split(" "); //extract the name of the deed
+                    //if they have the whole group, then check to see if they are trying to build without balancing
+                    //cll will take care of that
+                    if(myList.hasGroup(property[1], playerList[turnCounter].name)) {
+                        if(myList.getTitle(playerList[turnCounter].pos).priceH > playerList[turnCounter].money) {
+                            generalChannel.send("You can't afford to buy a house on that property!");
+                            return;
+                        }
+                        else {
+                            myList.buyHome(property[1]);
+                            generalChannel.send("You have bought a house on " + property[1] + " for " + myList.getTitle(playerList[turnCounter].pos).priceH);
+                            return;
+                        }
+                    }
+                    else {
+                        generalChannel.send("You can't build a house until you own all of the deeds in that group!");
+                        return;
+                    }
+                }
+            }
         }
 
     }
