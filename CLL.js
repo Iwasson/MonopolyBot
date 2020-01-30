@@ -105,7 +105,7 @@ class List {
             this.current = this.head;
 
             while (this.current != this.tail) {
-                fs.appendFileSync('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 + "/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
+                fs.appendFileSync('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 + "/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged + "/" + this.current.group, (err) => {
                     if (err) {
                         throw (err);
                     }
@@ -113,7 +113,7 @@ class List {
                 this.current = this.current.next;
             }
 
-            fs.appendFile('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 + "/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
+            fs.appendFile('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 + "/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged + "/" + this.current.group, (err) => {
                 if (err) {
                     throw (err);
                 }

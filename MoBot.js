@@ -68,6 +68,7 @@ client.on('ready', () => {
     var List = require('./CLL.js')
     myList = new List;
     myList.loadDefault(); //will always load the default game
+    loadCards();
 })
 
 //Listens for commands from the user
@@ -732,5 +733,15 @@ function pokeCommand(){
     generalChannel.send("Hey, " + playerList[turnCounter].name + " it is your turn...");
 }
 
+//loads the flavor text for all of the cards into the discard pile in order. 
+function loadCards() {
+
+}
+
+//will reshuffle the cards from discard into the draw pile randomly
+//deckNum is 0 for community and 1 for chance
+function shuffleDeck(deckNum) {
+
+}
 //logs bot into the server
 client.login(auth.token)
