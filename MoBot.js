@@ -8,6 +8,10 @@ const { createCanvas, loadImage } = require('canvas')
 var player;                                     //define struct
 var playerList = []                             //hold the players for game
 var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use 
+var comDraw = [];
+var comDiscard = [];
+var chanceDraw = [];
+var chanceDiscard = [];
 
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
@@ -148,6 +152,9 @@ function processCommand(receivedMessage) {
             generalChannel.send("Force ending the game!");
             gameStart = false;
             break;
+        case 'poke':
+            pokeCommand();
+            break;
         default:
             generalChannel.send("I don't understand the request")
             break
@@ -254,21 +261,29 @@ async function addPlayer(arguments, receivedMessage) {
     player.name = receivedMessage.author.toString();
     player.money = 1500;                        //starting money for each player
     player.property = null;                     //Start with no properties
-    player.piece = arguments;                   //What piece did the player pick?
+    player.piece = {};                          //What piece did the player pick?
     player.pos = 0;                             //stores the location of the player
     player.jail = 0;                            //set to 3 when sent to jail, decrement by 1 each turn they dont leave
     player.number = playerList.length;
     playerList.push(player);
     if (arguments == "car") {
+        var avatar = await Canvas.loadImage("https://bbts1.azureedge.net/images/p/full/2016/10/2bed1448-1d59-4bbc-a47d-534c35b3b040.jpg");
+        player.piece = avatar;
         pieces = pieces.filter(e => e !== "car");
     }
     else if (arguments == "hat") {
+        var avatar = await Canvas.loadImage("https://i.ebayimg.com/images/g/8PoAAOSwt05ZqtAL/s-l300.png");
+        player.piece = avatar;
         pieces = pieces.filter(e => e !== "hat");
     }
     else if (arguments == "shoe") {
+        var avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
+        player.piece = avatar;
         pieces = pieces.filter(e => e !== "shoe");
     }
     else if (arguments == "thimble") {
+        var avatar = await Canvas.loadImage("https://i.ebayimg.com/images/g/w8wAAOSwovNaOcjE/s-l300.png");
+        player.piece = avatar;
         pieces = pieces.filter(e => e !== "thimble");
     }
     generalChannel.send("Player added!")
@@ -687,7 +702,7 @@ function displayCommand(arguments) {
 }
 
 //used to get a printout of the board, it will update piece movements and house numbers.
-async function imgCommand(arguments) {
+async function imgCommand(arguments,) {
     const canvas = Canvas.createCanvas(1950, 1950);
     const ctx = canvas.getContext('2d');
     const background = await Canvas.loadImage('./assets/Board.jpg');
@@ -695,15 +710,20 @@ async function imgCommand(arguments) {
 
     ctx.strokeStyle = '#74037b';
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
-    const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
+    //const avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
-    ctx.drawImage(avatar, boardCoords[0][0], boardCoords[0][1], 50, 50)
-
+    for (var i = 0; i<playerList.length; ++i)
+    {
+        ctx.drawImage(playerList[i].piece, boardCoords[playerList[i].pos][0], boardCoords[playerList[i].pos][1], 50, 50);
+    }
     const attachment = new Discord.Attachment(canvas.toBuffer());
     generalChannel.send(attachment);
+}
 
+function pokeCommand(){
+    generalChannel.send("Hey, " + playerList[turnCounter].name + " it is your turn...");
 }
 
 //logs bot into the server
