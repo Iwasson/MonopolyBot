@@ -105,7 +105,7 @@ function processCommand(receivedMessage) {
             break;
         case 'inspect':
             if(turn(playerList, receivedMessage))
-                inspectCommand(receivedMessage);
+                inspectCommand();
             break;
         case 'bail':
             if(turn(playerList, receivedMessage))
@@ -359,8 +359,39 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-function inspectCommand(receivedMessage) {
-    generalChannel.send("You are on: " + myList[playerList[turnCounter].pos].title);
+function inspectCommand() {
+    tempTile = myList.getTitle(playerList[turnCounter].pos);
+    generalChannel.send("You are on: " + tempTile.title);
+
+    ownable = playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
+    
+    //only list info for player ownable tiles
+    if(tempTile.owner == "null" && ownable) {
+        generalChannel.send("This plot is unowned! \nYou can buy it for: " + tempTile.price);
+    }
+    else if(ownable) {
+        generalChannel.send("This plot is owned by: " + tempTile.owner + "\nThere are " + tempTile.houses + " houses on this plot.");
+        if(tempTile.houses > 0) {
+            if(tempTile.houses == 1) {
+                generalChannel.send("The rent is: " + tempTile.rent1);
+            }
+            if(tempTile.houses == 2) {
+                generalChannel.send("The rent is: " + tempTile.rent2);
+            }
+            if(tempTile.houses == 3) {
+                generalChannel.send("The rent is: " + tempTile.rent3);
+            }
+            if(tempTile.houses == 4) {
+                generalChannel.send("The rent is: " + tempTile.rent4);
+            }
+            if(tempTile.houses == 5) {
+                generalChannel.send("The rent is: " + tempTile.rentH);
+            }
+        }
+        else {
+            generalChannel.send("The rent is: " + tempTile.rent);
+        }
+    }
 }
 
 function bailCommand(receivedMessage) {

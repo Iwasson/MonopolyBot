@@ -129,6 +129,20 @@ class List {
         });
     }
 
+    getTitle(pos) {
+        if (this.head == null) {
+            console.log("List is empty")
+            return;
+        }
+        this.current = this.head
+        
+        while(pos > 0) {
+            this.current = this.current.next;
+            pos -= 1;
+        }
+        return this.current;
+    }
+
     displayAll(generalChannel) {
     
         if (this.head == null) {
