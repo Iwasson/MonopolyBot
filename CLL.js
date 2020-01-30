@@ -542,6 +542,35 @@ class List {
         this.current.owner = player;
     }
 
+    getTotalHomes(player) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        var counts = [];
+        var houseCount = 0;
+        var hotelCount = 0;
+        this.current = this.head;
+
+        do {
+            if (this.current.owner == player) {
+                //if they have a hotel increment hotelCount by 1
+                if(this.current.houses == 5) {
+                    hotelCount += 1;
+                }
+                else {
+                    houseCount += this.current.houses;
+                }
+            }
+            this.current = this.current.next;
+        } while (this.current != this.head);
+
+        counts.push(houseCount);
+        counts.push(hotelCount);
+        return counts;
+    }
+
     displayAll(generalChannel) {
 
         if (this.head == null) {
