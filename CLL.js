@@ -15,6 +15,7 @@ class Node {
             Rent with 4 houses
             Rent with 1 Hotel
             Is it currently Mortgaged
+            Group it belongs too (Blue group, Green Group etc...)
             
         
         The game will then constantly update and save and pull from this list. The idea is to have a list 
@@ -44,6 +45,7 @@ class Node {
         this.rentH = others[10];  //hotel rent
 
         this.mortgaged = others[11]; //has it been mortgaged
+        this.group = others[12]; //which housing group does it belong too
     }
 }
 
@@ -127,10 +129,14 @@ class List {
         }
 
         var deeds = "";
+        var count = 0;
         this.current = this.head;
 
         do {
             if (this.current.owner == player) {
+                count += 1;
+                deeds += count.toString();
+                deeds += ") ";
                 deeds += this.current.title;
                 deeds += "\n";
             }

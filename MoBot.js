@@ -411,13 +411,19 @@ function buyCommand(arguments) {
     tempTile = myList.getTitle(playerList[turnCounter].pos);
 
     if(arguments[0].toLowerCase() == "house") {
-        //check to see if they own the tile
-        if(tempTile.owner != playerList[turnCounter].name) {
-            generalChannel.send("You don't own this tile!");
-        }
-
         //will need to check to see if a player owns all of the deeds in a group
         //will need to check to see if the houses are being built correctly
+        //check to see if the player has any deeds
+        if(myList.getDeeds(playerList[turnCounter].name) == "") {
+            generalChannel.send("You don't have any properties to build houses on!");
+            return;
+        }
+        if(arguments[1] == null) {
+            generalChannel.send("Which property would you like to build a house on? \n" + myList.getDeeds(playerList[turnCounter].name));
+        }
+        else {
+            
+        }
 
     }
     else if(arguments[0].toLowerCase() == "deed") {
