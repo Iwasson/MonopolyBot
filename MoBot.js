@@ -8,6 +8,10 @@ const { createCanvas, loadImage } = require('canvas')
 var player;                                     //define struct
 var playerList = []                             //hold the players for game
 var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use 
+var comDraw = [];
+var comDiscard = [];
+var chanceDraw = [];
+var chanceDiscard = [];
 
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
