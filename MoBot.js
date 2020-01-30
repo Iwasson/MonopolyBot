@@ -262,29 +262,25 @@ async function addPlayer(arguments, receivedMessage) {
     player.name = receivedMessage.author.toString();
     player.money = 1500;                        //starting money for each player
     player.property = null;                     //Start with no properties
-    player.piece = {};                          //What piece did the player pick?
+    player.piece = null;                          //What piece did the player pick?
     player.pos = 0;                             //stores the location of the player
     player.jail = 0;                            //set to 3 when sent to jail, decrement by 1 each turn they dont leave
     player.number = playerList.length;
     playerList.push(player);
     if (arguments == "car") {
-        var avatar = await Canvas.loadImage("https://bbts1.azureedge.net/images/p/full/2016/10/2bed1448-1d59-4bbc-a47d-534c35b3b040.jpg");
-        player.piece = avatar;
+        player.piece = 0;
         pieces = pieces.filter(e => e !== "car");
     }
     else if (arguments == "hat") {
-        var avatar = await Canvas.loadImage("https://i.ebayimg.com/images/g/8PoAAOSwt05ZqtAL/s-l300.png");
-        player.piece = avatar;
+        player.piece = 1;
         pieces = pieces.filter(e => e !== "hat");
     }
     else if (arguments == "shoe") {
-        var avatar = await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif");
-        player.piece = avatar;
+        player.piece = 2;
         pieces = pieces.filter(e => e !== "shoe");
     }
     else if (arguments == "thimble") {
-        var avatar = await Canvas.loadImage("https://i.ebayimg.com/images/g/w8wAAOSwovNaOcjE/s-l300.png");
-        player.piece = avatar;
+        player.piece = 3;
         pieces = pieces.filter(e => e !== "thimble");
     }
     generalChannel.send("Player added!")
@@ -721,8 +717,12 @@ async function imgCommand(arguments, ) {
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
+    const avatars = [await Canvas.loadImage("https://bbts1.azureedge.net/images/p/full/2016/10/2bed1448-1d59-4bbc-a47d-534c35b3b040.jpg"),
+    await Canvas.loadImage("https://i.ebayimg.com/images/g/8PoAAOSwt05ZqtAL/s-l300.png"),
+    await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif"),
+    await Canvas.loadImage("https://i.ebayimg.com/images/g/w8wAAOSwovNaOcjE/s-l300.png")];
     for (var i = 0; i < playerList.length; ++i) {
-        ctx.drawImage(playerList[i].piece, boardCoords[playerList[i].pos][0], boardCoords[playerList[i].pos][1], 50, 50);
+        ctx.drawImage(avatars[playerList[i].piece], boardCoords[playerList[i].pos][0], boardCoords[playerList[i].pos][1], 50, 50);
     }
     const attachment = new Discord.Attachment(canvas.toBuffer());
     generalChannel.send(attachment);
