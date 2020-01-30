@@ -143,6 +143,21 @@ class List {
         return this.current;
     }
 
+    setOwner(pos, player) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        while(pos > 0) {
+            this.current = this.current.next;
+            pos -= 1;
+        }
+        this.current.owner = player;
+    }
+
     displayAll(generalChannel) {
     
         if (this.head == null) {

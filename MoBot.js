@@ -111,6 +111,10 @@ function processCommand(receivedMessage) {
             if(turn(playerList, receivedMessage))
                 bailCommand(receivedMessage);
             break;
+        case 'buy':
+            if(turn(playerList, receivedMessage))
+                buyCommand(arguments);
+            break;
         case 'reroll':
             generalChannel.send("Reseting roll");
             playerRoll = false;
@@ -394,6 +398,44 @@ function inspectCommand() {
             generalChannel.send("The rent is: " + tempTile.rent);
         }
     }
+}
+
+function buyCommand(arguments) {
+    if(arguments.length == 0) {
+        generalChannel.send("What would you like to buy? (Buy deed) or (Buy house)");
+        return;
+    }
+    tempTile = myList.getTitle(playerList[turnCounter].pos);
+
+    if(arguments[0].toLowerCase() == "house") {
+        //check to see if they own the tile
+        if(tempTile.owner != playerList[turnCounter].name) {
+            generalChannel.send("You don't own this tile!");
+        }
+
+    }
+    else if(arguments[0].toLowerCase() == "deed") {
+        //check to see if they already own the tile
+        if(tempTile.owner == playerList[turnCounter].name) {
+            generalChannel.send("You already own this tile!");
+        }
+        else if(tempTile.owner != "null") {
+            generalChannel.send("Someone else already owns this tile!")
+        }
+        else {
+            if(playerList[turnCounter].money < tempTile.price) {
+                generalChannel.send("You don't have enough money to buy that!");
+            }
+            else {
+                playerList[turnCounter].money -= tempTile.price;
+                myList.setOwner(playerList[turnCounter].pos, playerList[turnCounter].name);
+                generalChannel.send("You have bought " + tempTile.title + " for " + tempTile.price);
+            }
+        }
+    }
+    else {
+        generalChannel.send("I can't understand the request, try \"Buy Deed\" or \"Buy House\"");
+    } 
 }
 
 function bailCommand(receivedMessage) {
