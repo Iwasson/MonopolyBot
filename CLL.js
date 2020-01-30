@@ -28,14 +28,14 @@ class Node {
 
         var title = this.element.toString().split(":");
         var others = title[1].toString().split("/");
-        
+
         this.title = title[0];
         this.owner = others[0];  //stores who owns the tile
         this.houses = others[1];    //if its 5 then it will count as a hotel
         this.price = others[2];  //how much the tile costs to buy
         this.priceH = others[3]; //price per house 
         this.mortgage = others[4]; //mortgage rate
-        
+
         this.rent = others[5];   //no house rent
         this.rent1 = others[6];  //1 house rent
         this.rent2 = others[7];  //2 house rent
@@ -103,7 +103,7 @@ class List {
             this.current = this.head;
 
             while (this.current != this.tail) {
-                fs.appendFileSync('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 +"/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
+                fs.appendFileSync('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 + "/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
                     if (err) {
                         throw (err);
                     }
@@ -111,7 +111,7 @@ class List {
                 this.current = this.current.next;
             }
 
-            fs.appendFile('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 +"/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
+            fs.appendFile('assets/save.txt', this.current.title + ":" + this.current.owner + "/" + this.current.houses + "/" + this.current.price + "/" + this.current.priceH + "/" + this.current.mortgage + "/" + this.current.rent + "/" + this.current.rent1 + "/" + this.current.rent2 + "/" + this.current.rent3 + "/" + this.current.rent4 + "/" + this.current.rentH + "/" + this.current.mortgaged, (err) => {
                 if (err) {
                     throw (err);
                 }
@@ -119,11 +119,31 @@ class List {
         }
     }
 
+    //returns a list of all of the properties that a player owns
+    getDeeds(player) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        var deeds = "";
+        this.current = this.head;
+
+        do {
+            if (this.current.owner == player) {
+                deeds += this.current.title;
+                deeds += "\n";
+            }
+            this.current = this.current.next;
+        } while (this.current != this.head);
+        return deeds;
+    }
+
     savePlayer(players) {
         var fs = require('fs');
         var jsonData = JSON.stringify(players);
-        fs.writeFile("players.json", jsonData, function(err) {
-            if(err) {
+        fs.writeFile("players.json", jsonData, function (err) {
+            if (err) {
                 console.log(err);
             }
         });
@@ -135,8 +155,8 @@ class List {
             return;
         }
         this.current = this.head
-        
-        while(pos > 0) {
+
+        while (pos > 0) {
             this.current = this.current.next;
             pos -= 1;
         }
@@ -144,14 +164,14 @@ class List {
     }
 
     setOwner(pos, player) {
-        if(this.head == null) {
+        if (this.head == null) {
             console.log("List is empty");
             return;
         }
 
         this.current = this.head;
 
-        while(pos > 0) {
+        while (pos > 0) {
             this.current = this.current.next;
             pos -= 1;
         }
@@ -159,7 +179,7 @@ class List {
     }
 
     displayAll(generalChannel) {
-    
+
         if (this.head == null) {
             generalChannel.send("List is empty")
             console.log("List is empty")

@@ -111,6 +111,9 @@ function processCommand(receivedMessage) {
             if(turn(playerList, receivedMessage))
                 bailCommand(receivedMessage);
             break;
+        case 'deeds':
+            deedCommand(receivedMessage);
+            break;
         case 'buy':
             if(turn(playerList, receivedMessage))
                 buyCommand(arguments);
@@ -449,6 +452,10 @@ function bailCommand(receivedMessage) {
     else {
         generalChannel.send("You are not currently in jail!");
     }
+}
+
+function deedCommand(receivedMessage) {
+    generalChannel.send(myList.getDeeds(receivedMessage.author.toString()));
 }
 
 //ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
