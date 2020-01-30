@@ -319,9 +319,11 @@ function rollCommand(receivedMessage) {
     }
     else {
         playerList[turnCounter].pos += result;
+        inspectCommand();
 
         //check if they have passed go, give $200
         if(playerList[turnCounter].pos > 39) {
+            generalChannel.send("You have passed GO! Get $200!")
             playerList[turnCounter].pos = playerList[turnCounter].pos % 40;
             playerList[turnCounter].money += 200;
         }
@@ -363,7 +365,7 @@ function inspectCommand() {
     tempTile = myList.getTitle(playerList[turnCounter].pos);
     generalChannel.send("You are on: " + tempTile.title);
 
-    ownable = playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
+    ownable = playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 10 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 20 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
     
     //only list info for player ownable tiles
     if(tempTile.owner == "null" && ownable) {
