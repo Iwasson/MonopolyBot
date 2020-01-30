@@ -118,6 +118,10 @@ function processCommand(receivedMessage) {
             if (turn(playerList, receivedMessage))
                 buyCommand(arguments);
             break;
+        case 'sell':
+            if (turn(playerList, receivedMessage))
+                sellCommand(arguments);
+            break;
         case 'reroll':
             generalChannel.send("Reseting roll");
             playerRoll = false;
@@ -376,37 +380,82 @@ function inspectCommand() {
 
     //only list info for player ownable tiles
     if (tempTile.owner == "null" && ownable) {
-        generalChannel.send("This plot is unowned! \nYou can buy it for: " + tempTile.price);
+        generalChannel.send("This plot is unowned! \nYou can buy it for: $" + tempTile.price);
     }
     else if (ownable) {
         generalChannel.send("This plot is owned by: " + tempTile.owner + "\nThere are " + tempTile.houses + " houses on this plot.");
         if (tempTile.houses > 0) {
             if (tempTile.houses == 1) {
-                generalChannel.send("The rent is: " + tempTile.rent1);
+                generalChannel.send("The rent is: $" + tempTile.rent1);
             }
             if (tempTile.houses == 2) {
-                generalChannel.send("The rent is: " + tempTile.rent2);
+                generalChannel.send("The rent is: $" + tempTile.rent2);
             }
             if (tempTile.houses == 3) {
-                generalChannel.send("The rent is: " + tempTile.rent3);
+                generalChannel.send("The rent is: $" + tempTile.rent3);
             }
             if (tempTile.houses == 4) {
-                generalChannel.send("The rent is: " + tempTile.rent4);
+                generalChannel.send("The rent is: $" + tempTile.rent4);
             }
             if (tempTile.houses == 5) {
-                generalChannel.send("The rent is: " + tempTile.rentH);
+                generalChannel.send("The rent is: $" + tempTile.rentH);
             }
         }
         else {
-            generalChannel.send("The rent is: " + tempTile.rent);
+            generalChannel.send("The rent is: $" + tempTile.rent);
         }
     }
 }
 
+//allows a user to sell a house that they have built on a property
+//must sell in order (can't sell all of the houses on one without selling all of them on another)
 function sellCommand(arguments) {
+    //get user input
+    if (arguments.length == 0) {
+        if (myList.getDeeds(playerList[turnCounter].name) == "") {
+            generalChannel.send("You don't have any properties to sell houses on!");
+            return;
+        }
+        else {
+            generalChannel.send("Which property would you like to sell a house on? (ex. >sell 1) \n" + myList.getDeeds(playerList[turnCounter].name));
+            return;
+        }
+    }
+    if (is_Numeric(arguments[0])) {
+        var choice = parseInt(arguments[0]);
+        var options = myList.getDeeds(playerList[turnCounter].name);
 
+        if (choice > options.length + 1) {
+            generalChannel.send("Thats not a valid option.");
+        }
+        else {
+            var property = options[choice].split(" ");
+            var seller = myList.getDeed(property[1]);
+
+            //check to see if there are even any houses to sell
+            if (seller.houses < 0) {
+                generalChannel.send("There aren't any houses on that property to sell!");
+                return;
+            }
+
+            //check to see if selling one house upsets the balance
+            if (myList.sellHome(deedName)) {
+                playerList[turnCounter].money += seller.priceH;
+                generalChannel.send("You have sold one house on " + seller.title + " for $" + seller.priceH);
+                return;
+            }
+            else {
+                generalChannel.send("You could not sell a house on " + seller.title + "\nMaybe try selling your other houses in that group first...");
+                return;
+            }
+        }
+    }
+    else {
+        generalChannel.send("I don't understand the request...\nTry >sell 1");
+    }
 }
 
+//allows a user to buy either a deed or a house on a deed they own
 function buyCommand(arguments) {
     if (arguments.length == 0) {
         generalChannel.send("What would you like to buy? (Buy deed) or (Buy house)");
@@ -448,7 +497,7 @@ function buyCommand(arguments) {
                         }
                         else {
                             myList.buyHome(property[1]);
-                            generalChannel.send("You have bought a house on " + property[1] + " for " + myList.getTitle(playerList[turnCounter].pos).priceH);
+                            generalChannel.send("You have bought a house on " + property[1] + " for $" + myList.getTitle(playerList[turnCounter].pos).priceH);
                             return;
                         }
                     }
@@ -458,8 +507,11 @@ function buyCommand(arguments) {
                     }
                 }
             }
+            else {
+                generalChannel.send("I don't understand the request...\nTry >buy house 1");
+                return;
+            }
         }
-
     }
     else if (arguments[0].toLowerCase() == "deed") {
         //check to see if they already own the tile

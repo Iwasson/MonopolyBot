@@ -203,6 +203,74 @@ class List {
         }
     }
 
+    sellHome(deedName) {
+        var groupId = getGroup(deedName);
+        var groupDeeds;
+        var choice;
+        var count = 0;
+        var h1;
+        var h2;
+        var h3;
+
+        do {
+            if (this.current.group == groupId) {
+                groupDeeds += this.current;
+            }
+            if (this.current.title == deedName) {
+                choice = count;
+            }
+            count += 1;
+            this.current = this.current.next;
+        } while (this.current != this.head);
+        //check to see if the homes are on the groups that have only two deeds
+        if(groupId == 1 || groupId == 8) {
+            if (choice == 0) {
+                h1 = groupDeeds[0];
+                h2 = groupDeeds[1];
+            }
+            else {
+                h1 = groupDeeds[1];
+                h2 = groupDeeds[0];
+            }
+
+            //if the two deeds have equal number of houses, or if selling one would put it at greater than
+            //or equal to the other, sell it
+            if(h1.houses == h2.houses || (h1.houses - 1 >= h2.houses)) {
+                this.setHouseCount(deedName, -1);
+                return true;
+            }
+        }
+        else {
+            if (choice == 0) {
+                h1 = groupDeeds[0];
+                h2 = groupDeeds[1];
+                h3 = groupDeeds[2];
+            }
+            if (choice == 1) {
+                h1 = groupDeeds[1];
+                h2 = groupDeeds[2];
+                h3 = groupDeeds[0];
+            }
+            if (choice == 2) {
+                h1 = groupDeeds[2];
+                h2 = groupDeeds[0];
+                h3 = groupDeeds[1];
+            }
+
+            if (h1.houses == h2.houses && h1.houses == h3.houses) {
+                setHouseCount(deedName, -1);
+                return true;
+            }
+            else if ((h1.houses - 1 >= h2.houses) && (h1.houses - 1 >= h3.houses)) {
+                setHouseCount(deedName, -1);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
     //attempts to buy a house, assume hasGroup has already been called
     //will not check to see if one person owns all of the deeds in a group 
     buyHome(deedName) {
@@ -228,7 +296,6 @@ class List {
             return false;
         }
 
-        //stick all of the deeds that are part of a group into one array
         do {
             if (this.current.group == groupId) {
                 groupDeeds += this.current;
@@ -259,7 +326,7 @@ class List {
 
             //you can buy if they have the same number of houses or if the choice has less than the other
             if (h1.houses == h2.houses || h1.houses < h2.houses) {
-                setHouseCount(deedName);
+                setHouseCount(deedName, 1);
                 return true;
             }
             else {
@@ -290,11 +357,11 @@ class List {
 
             //if they all have equal amounts of houses on them, buy a home
             if (h1.houses == h2.houses && h1.houses == h3.houses) {
-                setHouseCount(deedName);
+                setHouseCount(deedName, 1);
                 return true;
             }
             else if ((h1.houses + 1 <= h2.houses) && (h1.houses + 1 <= h3.houses)) {
-                setHouseCount(deedName);
+                setHouseCount(deedName, 1);
                 return true;
             }
 
@@ -302,7 +369,7 @@ class List {
     }
 
     //builds one house on a specific deed
-    setHouseCount(deedName) {
+    setHouseCount(deedName, counts) {
         if (this.head == null) {
             console.log("List is empty");
             return;
@@ -312,7 +379,7 @@ class List {
 
         do {
             if (this.current.title == deedName) {
-                this.current.houses += 1;
+                this.current.houses += count;
                 return;
             }
             this.current = this.current.next;
@@ -341,6 +408,22 @@ class List {
             pos -= 1;
         }
         return this.current;
+    }
+    
+    getDeed(deedName) {
+        if(this.head == null) {
+            console.log("List is empty")
+            return;
+        }
+
+        this.current = this.head;
+
+        do {
+            if(this.current.title == deedName) {
+                return this.current;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
     }
 
     setOwner(pos, player) {
