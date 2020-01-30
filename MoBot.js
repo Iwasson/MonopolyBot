@@ -122,6 +122,14 @@ function processCommand(receivedMessage) {
             if (turn(playerList, receivedMessage))
                 sellCommand(arguments);
             break;
+        case 'mortgage':
+            if (turn(playerList, receivedMessage))
+                mortgageCommand(arguments);
+            break;
+        case 'unmortgage':
+            if (turn(playerList, receivedMessage))
+                unmortgageCommand(arguments);
+            break;
         case 'reroll':
             generalChannel.send("Reseting roll");
             playerRoll = false;
@@ -374,7 +382,7 @@ function getRandomInt(min, max) {
 
 function inspectCommand() {
     tempTile = myList.getTitle(playerList[turnCounter].pos);
-    generalChannel.send("You are on: " + tempTile.title);
+    generalChannel.send("You have $" + playerList[turnCounter].money + "\nYou are on: " + tempTile.title);
 
     ownable = playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 10 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 20 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
 
@@ -534,6 +542,100 @@ function buyCommand(arguments) {
     }
     else {
         generalChannel.send("I can't understand the request, try \"Buy Deed\" or \"Buy House\"");
+    }
+}
+
+//allows you to mortgage a deed if and only if no houses are built on it,  
+//or the rest of the group
+function mortgageCommand(arguments) {
+    //need to check three things
+    //1 do they own the deed
+    //2 do they have any houses in this group
+    //3 is it already mortgaged
+
+    if (arguments.length == 0) {
+        if (myList.getDeeds(playerList[turnCounter].name) == "") {
+            generalChannel.send("You don't have any properties to mortgage!");
+            return;
+        }
+        else {
+            generalChannel.send("What property would you like to mortgage?\n" + myList.getDeeds(playerList[turnCounter].name));
+            return;
+        }
+    }
+    else {
+        if (is_Numeric(arguments[0])) {
+            var choice = parseInt(arguments[0]); //store the number in int form
+            var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
+
+            //check to see if the option they provided is greater than the possible options
+            if (choice > options.length + 1) {
+                generalChannel.send("Thats not a valid option.");
+            }
+            else {
+                var property = options[choice].split(" ");
+
+                //check to see if any houses are built on that group
+                if (myList.getHouseCount(property[1]) != 0) {
+                    generalChannel.send("You can't mortgage a property if it has houses on it, try selling them first!");
+                    return;
+                }
+                //if not then mortgage the property, flip the flag and pay the user
+                else {
+                    playerList[turnCounter].money += myList.getDeed(property[1]).mortgage;
+                    myList.mortgage(property[1]);
+                    generalChannel.send("You have mortgaged " + property[1] + " for $" + myList.getDeed(property[1]).mortgage);
+                    return;
+                }
+            }
+        }
+        else {
+            generalChannel.send("I don't understand the request...\nTry >mortgage 1");
+            return;
+        }
+    }
+}
+
+//lets you pay to unmortgage a property
+//unmortgage is mortgage price plus %10
+function unmortgageCommand(arguments) {
+    if (arguments.length == 0) {
+        if (myList.getDeeds(playerList[turnCounter].name) == "") {
+            generalChannel.send("You don't have any properties to unmortgage!");
+            return;
+        }
+        else {
+            generalChannel.send("What property would you like to unmortgage?\n" + myList.getMortgagedDeeds(playerList[turnCounter].name));
+            return;
+        }
+    }
+    else {
+        if (is_Numeric(arguments[0])) {
+            var choice = parseInt(arguments[0]); //store the number in int form
+            var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
+
+            //check to see if the option they provided is greater than the possible options
+            if (choice > options.length + 1) {
+                generalChannel.send("Thats not a valid option.");
+            }
+            else {
+                var property = options[choice].split(" ");
+                var uMorPrice = myList.getDeed(property[1]).mortgage + (myList.getDeed(property[1]).mortgage * .1)
+
+                if (uMorPrice > playerList[turnCounter].money) {
+                    generalChannel.send("You can't afford to Unmortgage that property!");
+                    return;
+                }
+                else {
+                    playerList[turnCounter].money -= uMorPrice;
+                    myList.unmortgage(property[1]);
+                }
+            }
+        }
+        else {
+            generalChannel.send("I don't understand the request...\nTry >unmortgage 1");
+            return;
+        }
     }
 }
 

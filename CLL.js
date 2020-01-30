@@ -223,7 +223,7 @@ class List {
             this.current = this.current.next;
         } while (this.current != this.head);
         //check to see if the homes are on the groups that have only two deeds
-        if(groupId == 1 || groupId == 8) {
+        if (groupId == 1 || groupId == 8) {
             if (choice == 0) {
                 h1 = groupDeeds[0];
                 h2 = groupDeeds[1];
@@ -235,7 +235,7 @@ class List {
 
             //if the two deeds have equal number of houses, or if selling one would put it at greater than
             //or equal to the other, sell it
-            if(h1.houses == h2.houses || (h1.houses - 1 >= h2.houses)) {
+            if (h1.houses == h2.houses || (h1.houses - 1 >= h2.houses)) {
                 this.setHouseCount(deedName, -1);
                 return true;
             }
@@ -368,6 +368,66 @@ class List {
         }
     }
 
+    //returns a list of all of the deeds a player has mortgaged
+    getMortgagedDeeds(player) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+        var deeds = "";
+        var count = 0;
+
+        do {
+            if (this.current.owner == player && this.current.mortgaged == true) {
+                count += 1;
+                deeds += count.toString();
+                deeds += ") ";
+                deeds += this.current.title;
+                deeds += "\n";
+            }
+            this.current = this.current.next;
+        } while (this.current != this.head);
+        return deeds;
+    }
+
+    //mortgages a property
+    mortgage(deedName) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        do {
+            if (this.current.title == deedName) {
+                this.current.mortgaged = true;
+                return;
+            }
+            this.current = this.current.next;
+        } while (this.current != this.head);
+    }
+
+    //unmortgages a property
+    unmortgage(deedName) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        do {
+            if (this.current.title = deedName) {
+                this.current.mortgaged = false;
+                return;
+            }
+            this.current = this.current.next;
+        } while (this.current != this.head);
+    }
+
     //builds one house on a specific deed
     setHouseCount(deedName, counts) {
         if (this.head == null) {
@@ -396,6 +456,27 @@ class List {
         });
     }
 
+    //returns how many houses are built in a group
+    getHouseCount(deedName) {
+        if (this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        var groupId = getGroup(deedName);
+        var count = 0;
+        this.current = this.head;
+
+        do {
+            if (this.current.group == groupId) {
+                count += this.current.houses;
+            }
+            this.current = this.current.next;
+        } while (this.current != this.head);
+
+        return count;
+    }
+
     getTitle(pos) {
         if (this.head == null) {
             console.log("List is empty")
@@ -409,9 +490,9 @@ class List {
         }
         return this.current;
     }
-    
+
     getDeed(deedName) {
-        if(this.head == null) {
+        if (this.head == null) {
             console.log("List is empty")
             return;
         }
@@ -419,11 +500,11 @@ class List {
         this.current = this.head;
 
         do {
-            if(this.current.title == deedName) {
+            if (this.current.title == deedName) {
                 return this.current;
             }
             this.current = this.current.next;
-        } while(this.current != this.head);
+        } while (this.current != this.head);
     }
 
     setOwner(pos, player) {
