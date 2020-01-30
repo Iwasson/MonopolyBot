@@ -148,6 +148,9 @@ function processCommand(receivedMessage) {
             generalChannel.send("Force ending the game!");
             gameStart = false;
             break;
+        case 'poke':
+            pokeCommand();
+            break;
         default:
             generalChannel.send("I don't understand the request")
             break
@@ -713,7 +716,10 @@ async function imgCommand(arguments,) {
     }
     const attachment = new Discord.Attachment(canvas.toBuffer());
     generalChannel.send(attachment);
+}
 
+function pokeCommand(){
+    generalChannel.send("Hey, " + playerList[turnCounter].name + " it is your turn...");
 }
 
 //logs bot into the server
