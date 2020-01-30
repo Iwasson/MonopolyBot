@@ -413,6 +413,9 @@ function buyCommand(arguments) {
             generalChannel.send("You don't own this tile!");
         }
 
+        //will need to check to see if a player owns all of the deeds in a group
+        //will need to check to see if the houses are being built correctly
+
     }
     else if(arguments[0].toLowerCase() == "deed") {
         //check to see if they already own the tile
