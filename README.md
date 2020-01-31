@@ -14,4 +14,4 @@ TODO
 ===================
 - [x] Make a list, check it twice ;)
 - [x] Add images to the player peices instead of colors.
--- [ ] Add local imgs not from the interwebs
+  - [ ] Add local imgs not from the interwebs
