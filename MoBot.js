@@ -12,6 +12,10 @@ var comDraw = [];
 var comDiscard = [];
 var chanceDraw = [];
 var chanceDiscard = [];
+var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
+
+var availableHouses = 32;                       //starting number of houses, if 0 then you cant buy a house
+var availableHotels = 12;                       //starting number of hotels, if 0 then you cant buy a hotel
 
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
@@ -267,6 +271,7 @@ async function addPlayer(arguments, receivedMessage) {
     player.property = null;                     //Start with no properties
     player.piece = null;                          //What piece did the player pick?
     player.pos = 0;                             //stores the location of the player
+    player.getOutCard = 0;                      //set to 1 if they have a get out of jail card and 2 if they have two of them
     player.jail = 0;                            //set to 3 when sent to jail, decrement by 1 each turn they dont leave
     player.number = playerList.length;
     playerList.push(player);
@@ -363,11 +368,11 @@ function rollCommand(receivedMessage) {
         }
         //land on community chest
         if (playerList[turnCounter].pos == 2 || playerList[turnCounter].pos == 17 || playerList[turnCounter].pos == 33) {
-
+            drawCard(0);
         }
         //land on chance
         if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
-
+            drawCard(1);
         }
         //income tax
         if (playerList[turnCounter].pos == 4) {
@@ -519,6 +524,10 @@ function buyCommand(arguments) {
                             return;
                         }
                         else {
+                            if(myList.getDeed[property[1]].houses == 5) {
+                                generalChannel.send("You already have a hotel on that property, you can't buy any more houses!");
+                                return;
+                            }
                             if (myList.groupMortgaged(property[1]) == false) {
                                 myList.buyHome(property[1]);
                                 generalChannel.send("You have bought a house on " + property[1] + " for $" + myList.getTitle(playerList[turnCounter].pos).priceH);
@@ -753,7 +762,268 @@ function loadCards() {
 //will reshuffle the cards from discard into the draw pile randomly
 //deckNum is 0 for community and 1 for chance
 function shuffleDeck(deckNum) {
+    //shuffle community
+    if (deckNum == 0) {
+        while (comDiscard != null) {
+            var rpos = getRandomInt(0, comDiscard.length);
+            comDraw.push(comDiscard[rpos]);
+            comDiscard = comDiscard.filter(e => e !== comDiscard[rpos]);
+        }
+    }
+    //shuffle chance
+    if (deckNum == 1) {
+        while (chanceDiscard != null) {
+            var rpos = getRandomInt(0, chanceDiscard.length);
+            chanceDraw.push(chanceDiscard[rpos]);
+            chanceDiscard = chanceDiscard.filter(e => e !== chanceDiscard[rpos]);
+        }
+    }
+}
 
+function drawCard(deckNum) {
+    //draw from community
+    if (deckNum == 0) {
+        if (comDraw.length == 0) {
+            shuffleDeck(0);
+        }
+        //get the text and split it, card[0] has the card number
+        //card[1] has the flavor text
+        var card = comDraw[0].split(") ");
+
+        switch (card[0]) {
+            case '1':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 200;
+                playerList[turnCounter].pos = 0;
+                break;
+            case '2':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 200;
+                break;
+            case '3':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money -= 50;
+                break;
+            case '4':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 50;
+                break;
+            case '5': //get out of jail free card, needs to removed from the list and saved until used
+                generalChannel.send(card[1]);
+                playerList[turnCounter].getOutCard += 1;
+                getOutOfJail.push(comDraw[0]);
+                break;
+            case '6':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].pos = 30;
+                playerList[turnCounter].jail = 3;
+                break;
+            case '7':
+                generalChannel.send(card[1]);
+                playerList.forEach(element => {
+                    if(element != playerList[turnCounter]) {
+                        element.money -= 50;
+                        playerList[turnCounter].money += 50;
+                    }
+                });
+                break;
+            case '8':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 100;
+                break;
+            case '9':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 20;
+                break;
+            case '10':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 100;
+                break;
+            case '11':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money -= 50;
+                break;
+            case '12':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money -= 50;
+                break;
+            case '13':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 25;
+                break;
+            case '14':
+                generalChannel.send(card[1]); //pay $40 house and $115 per hotel
+                var counts = myList.getTotalHomes(playerList[turnCounter].name);
+                while(counts[0] != 0) {
+                    playerList[turnCounter].money -= 40;
+                    counts[0] -= 1;
+                }
+
+                while(counts[1] != 0) {
+                    playerList[turnCounter].money -= 115;
+                    counts[1] -= 1;
+                }
+
+                break;
+            case '15':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 10;
+                break;
+            case '16':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 100;
+                break;
+        }
+        //dont put the get out of jail card back onto the discard pile
+        if(card[0] != '5') {
+            comDiscard.push(comDraw[0]);
+        }
+        comDraw = comDraw.filter(e => e !== comDraw[0]);
+    }
+    //draw from chance
+    if (deckNum == 1) {
+        if (chanceDraw.length == 0) {
+            shuffleDeck(1);
+        }
+
+        var card = chanceDraw[0].split(") ");
+
+        switch (card[0]) {
+            case '1':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 200;
+                playerList[turnCounter].pos = 0;
+                break;
+            case '2':
+                generalChannel.send(card[1]);
+                //advance to illinois if pos is > illinois then you "advanced past go"
+                if(playerList[turnCounter].pos > 24) {
+                    playerList[turnCounter].money += 200;
+                }
+                playerList[turnCounter].pos = 24;
+                break;
+            case '3':
+                generalChannel.send(card[1]);
+                if(playerList[turnCounter].pos > 11) {
+                    playerList[turnCounter].money += 200;
+                }
+                playerList[turnCounter].pos = 11;
+                break;
+            case '4':
+                generalChannel.send(card[1]); //advance to nearest utility throw two die and pay 10 times that amount
+                var nearUtil = myList.getNearestUtil(playerList[turnCounter].pos);
+                var utilPos;
+                if(nearUtil == "Electric Company") {
+                    utilPos = 12;
+                }
+                else if(nearUtil == "Water Works") {
+                    utilPos = 28;
+                }
+                else {
+                    console.log("error: couldnt find nearest util");
+                    return;
+                }
+                if(playerList[turnCounter].pos > utilPos) {
+                    playerList[turnCounter].money += 200;
+                }
+                playerList[turnCounter].pos = utilPos;
+                break;
+            case '5':
+                generalChannel.send(card[1]); //advance to nearest railroad pay x2
+                var nearRail = myList.getNearestRail(playerList[turnCounter].pos);
+                var railPos;
+                if(nearRail == "Reading Railroad") {
+                    railPos = 5;
+                }
+                else if(nearRail == "Pennsylvania Railroad") {
+                    railPos = 15;
+                }
+                else if(nearRail == "B & O Railroad") {
+                    railPos = 25;
+                }
+                else if(nearRail == "Short Line") {
+                    railPos = 35;
+                }
+                else {
+                    console.log("error: couldnt find nearest rail");
+                    return;
+                }
+                if(playerList[turnCounter].pos > railPos) {
+                    playerList[turnCounter].money += 200;
+                }
+                playerList[turnCounter].pos = railPos;
+                break;
+            case '6':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 50
+                break;
+            case '7':
+                generalChannel.send(card[1]); //get out of jail card
+                playerList[turnCounter].getOutCard += 1;
+                getOutOfJail.push(chanceDraw[0]);
+                break;
+            case '8':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].pos -= 3;
+                break;
+            case '9':
+                generalChannel.send(card[1]); //go to jail
+                playerList[turnCounter].pos = 30;
+                playerList[turnCounter].jail = 3;
+                break;
+            case '10':
+                generalChannel.send(card[1]); //pay 25 per house and 100 per hotel
+                var counts = myList.getTotalHomes(playerList[turnCounter].name);
+                while(counts[0] != 0) {
+                    playerList[turnCounter].money -= 25;
+                    counts[0] -= 1;
+                }
+
+                while(counts[1] != 0) {
+                    playerList[turnCounter].money -= 100;
+                    counts[1] -= 1;
+                }
+                break;
+            case '11':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money -= 15;
+                break;
+            case '12':
+                generalChannel.send(card[1]);
+                if(playerList[turnCounter].pos > 5) {
+                    playerList[turnCounter].money += 200;
+                }
+                playerList[turnCounter].pos = 5;
+                break;
+            case '13':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].pos = 39;
+                break;
+            case '14':
+                generalChannel.send(card[1]); //pay each player 50
+                playerList.forEach(element => {
+                    if(element != playerList[turnCounter]) {
+                        element.money += 50;
+                        playerList[turnCounter].money -= 50;
+                    }
+                });
+                break;
+            case '15':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 150;
+                break;
+            case '16':
+                generalChannel.send(card[1]);
+                playerList[turnCounter].money += 100;
+                break;
+        }
+
+        //dont put the get out of jail free card back into the discard pile
+        if(card[0] != '7') {
+            chanceDiscard.push(chanceDraw[0]);
+        }
+        chanceDraw = chanceDraw.filter(e => e !== chanceDraw[0]);
+    }
 }
 
 //logs bot into the server
