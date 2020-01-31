@@ -513,26 +513,26 @@ class List {
         if(tempDeed.group != 9 && tempDeed.group != 10) {
             //if they have the group and no houses on that tile
             if(this.hasGroup(tempDeed.title, tempDeed.owner) && tempDeed.houses == 0) {
-                return tempDeed.rent * 2; //double the base rent
+                return parseInt(tempDeed.rent) * 2; //double the base rent
             }
             else {
                 if(tempDeed.houses == 0) {
-                    return tempDeed.rent;
+                    return parseInt(tempDeed.rent);
                 }
                 else if(tempDeed.houses == 1) {
-                    return tempDeed.rent1;
+                    return parseInt(tempDeed.rent1);
                 }
                 else if(tempDeed.houses == 2) {
-                    return tempDeed.rent2;
+                    return parseInt(tempDeed.rent2);
                 }
                 else if(tempDeed.houses == 3) {
-                    return tempDeed.rent3;
+                    return parseInt(tempDeed.rent3);
                 }
                 else if(tempDeed.houses == 4) {
-                    return tempDeed.rent4;
+                    return parseInt(tempDeed.rent4);
                 }
                 else if(tempDeed.houses == 5) {
-                    return tempDeed.rentH;
+                    return parseInt(tempDeed.rentH);
                 }
             }
         }
