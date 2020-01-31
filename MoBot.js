@@ -454,7 +454,7 @@ function inspectCommand() {
     if (tempTile.owner == "null" && ownable) {
         generalChannel.send("This plot is unowned! \nYou can buy it for: $" + tempTile.price);
     }
-    else if (ownable) {
+    else if (ownable && tempTile.mortgaged == false) {
         generalChannel.send("This plot is owned by: " + tempTile.owner + "\nThere are " + tempTile.houses + " houses on this plot.");
         if (tempTile.houses > 0) {
             if (tempTile.houses == 1) {
@@ -476,6 +476,9 @@ function inspectCommand() {
         else {
             generalChannel.send("The rent is: $" + tempTile.rent);
         }
+    }
+    else if(tempTile.mortgaged == true) {
+        generalChannel.send("This tile is mortgaged!");
     }
 }
 
