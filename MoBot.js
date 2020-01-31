@@ -369,7 +369,42 @@ function rollCommand(receivedMessage) {
         }
         //land on chance
         if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
-            drawCard(1);
+            var check = drawCard(1);
+            //if they advanced to nearest util
+            if(check == 1) {
+                //see if owned
+                if(myList.getTitle(playerList[turnCounter].pos).owner == "null") {
+                    //if unowned then notify they can buy it
+                    generalChannel.send("This utility is unowned, you could buy it!");
+                }
+                //otherwise this tile is owned and you need to pay a specific amount
+                else {
+                    //util says roll 2 die, multiply by 10 then pay that to owner
+                    var die3 = getRandomInt(1, 7);
+                    var die4 = getRandomInt(1, 7);
+                    var tempResult = die3 + die4;
+                    tempResult = tempResult * 10;
+                    playerList[turnCounter].money -= tempResult;
+                    playerList.forEach(element => {
+                        if(element.name == myList.getTitle(playerList[turnCounter].pos).owner) {
+                            element.money += tempResult;
+                        }
+                    });
+                    generalChannel.send("You roll two die and get: " + (die3 + die4) + "\nSo you have to pay " + tempResult + " to " + myList.getTitle(playerList[turnCounter].pos).owner);
+                }
+            }
+            //check if they advanced to nearest railroad
+            if(check == 2) {
+                //if unowned then notify they can buy it
+                if(myList.getTitle(playerList[turnCounter].pos).owner == "null") {
+                    generalChannel.send("This railroad is unowned, you could buy it!");
+                }
+                //otherwise pay double the rent
+                else {
+                    var payment = myList.getTotalRent(playerList[turnCounter].pos, result);
+                    playerList[turnCounter].money -= (payment * 2);
+                }
+            }
         }
         //income tax
         if (playerList[turnCounter].pos == 4) {
@@ -778,6 +813,10 @@ function shuffleDeck(deckNum) {
 }
 
 function drawCard(deckNum) {
+    //used to tell if a user has drawn the advance to card
+    //if 1 then they advanced to nearest util, may need to pay x10
+    //if 2 then they advanced to nearest rail, may need to pay x2
+    var check = 0; 
     //draw from community
     if (deckNum == 0) {
         if (comDraw.length == 0) {
@@ -924,6 +963,7 @@ function drawCard(deckNum) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = utilPos;
+                check = 1;
                 break;
             case '5':
                 generalChannel.send(card[1]); //advance to nearest railroad pay x2
@@ -949,6 +989,7 @@ function drawCard(deckNum) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = railPos;
+                check = 2;
                 break;
             case '6':
                 generalChannel.send(card[1]);
@@ -1021,6 +1062,7 @@ function drawCard(deckNum) {
         }
         chanceDraw = chanceDraw.filter(e => e !== chanceDraw[0]);
     }
+    return check;
 }
 
 //logs bot into the server

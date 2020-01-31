@@ -497,6 +497,73 @@ class List {
         return count;
     }
 
+    //checks to see how much rent is owed
+    //pos is the title that the player is on
+    //check to see if there are houses or if they have multiple railroads
+    getTotalRent(pos, roll) {
+        var tempDeed = getTitle(pos);
+
+        //dont pay rent for mortgaged properties
+        if(tempDeed.mortgaged == true) {
+            return 0;
+        }
+        //if a player has the full group of properties (not utils or railroads) and there is no housing, rent is double base
+        if(tempDeed.group != 9 && tempDeed.group != 10) {
+            //if they have the group and no houses on that tile
+            if(hasGroup(tempDeed.title, tempDeed.owner) && tempDeed.houses == 0) {
+                return tempDeed.rent * 2; //double the base rent
+            }
+            else {
+                if(tempDeed.houses == 1) {
+                    return tempDeed.rent1;
+                }
+                else if(tempDeed.houses == 2) {
+                    return tempDeed.rent2;
+                }
+                else if(tempDeed.houses == 3) {
+                    return tempDeed.rent3;
+                }
+                else if(tempDeed.houses == 4) {
+                    return tempDeed.rent4;
+                }
+                else if(tempDeed.houses == 5) {
+                    return tempDeed.rentH;
+                }
+            }
+        }
+
+        //if the deed is a railroad
+        if(tempDeed.group == 9) {
+            var totalRail = getRails(tempDeed.owner);
+
+            if(totalRail == 1) {
+                return 25;
+            }
+            if(totalRail == 2) {
+                return 50;
+            }
+            if(totalRail == 3) {
+                return 100;
+            }
+            if(totalRail == 4) {
+                return 200;
+            } 
+        }
+
+        //if the deed is a utility
+        if(tempDeed.group == 10) {
+            var totalUtil = getUtils(tempDeed.owner);
+
+            if(totalUtil == 1) {
+                return roll * 4;
+            }
+            if(totalUtil == 2) {
+                return roll * 10;
+            }
+        }
+
+    }
+
     getTitle(pos) {
         if (this.head == null) {
             console.log("List is empty")
@@ -509,6 +576,46 @@ class List {
             pos -= 1;
         }
         return this.current;
+    }
+
+    //returns how many railroads the player owns
+    getRails(player) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+        var count = 0;
+
+        do {
+            if(this.current.group == 9 && this.current.owner == player) {
+                count += 1;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+
+        return count;
+    }
+
+    //returns how many utils the player owns
+    getUtils(player) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+        var count = 0;
+
+        do {
+            if(this.current.group == 10 && this.current.owner == player) {
+                count += 1;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+
+        return count;
     }
 
     getDeed(deedName) {
