@@ -368,7 +368,7 @@ function rollCommand(receivedMessage) {
             drawCard(0);
         }
         //land on chance
-        if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
+        else if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
             var check = drawCard(1);
             //if they advanced to nearest util
             if(check == 1) {
@@ -407,20 +407,35 @@ function rollCommand(receivedMessage) {
             }
         }
         //income tax
-        if (playerList[turnCounter].pos == 4) {
+        else if (playerList[turnCounter].pos == 4) {
             generalChannel.send("You've landed on income tax! Pay $200!");
             playerList[turnCounter].money -= 200;
         }
         //luxury tax
-        if (playerList[turnCounter].pos == 38) {
+        else if (playerList[turnCounter].pos == 38) {
             generalChannel.send("You've landed on luxury tax! Pay $100!");
             playerList[turnCounter].money -= 100;
         }
         //go to jail
-        if (playerList[turnCounter].pos == 30) {
+        else if (playerList[turnCounter].pos == 30) {
             generalChannel.send("You've landed on Go to Jail! Go straight to jail!");
             playerList[turnCounter].pos = 10;
             playerList[turnCounter].jail = 3;
+        }
+        //otherwise pay rent to the person who owns this tile
+        else {
+            var tempDeed = myList.getTitle(playerList[turnCounter].pos);
+            //if someone owns this tile, pay rent
+            if(tempDeed.owner != "null") {
+                var totalRent = myList.getTotalRent(playerList[turnCounter].pos);
+                playerList[turnCounter].money -= totalRent;
+                playerList.forEach(element => {
+                    if(element.name == tempDeed.owner) {
+                        element.money += totalRent;
+                    }
+                });
+                generalChannel.send("You pay " + tempDeed.owner + " $" + totalRent + " for staying at their property");
+            }
         }
     }
 }
