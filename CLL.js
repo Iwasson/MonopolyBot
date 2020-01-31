@@ -128,6 +128,7 @@ class List {
             return;
         }
 
+        var deedArr = [];
         var deeds = "";
         var count = 0;
         this.current = this.head;
@@ -138,11 +139,12 @@ class List {
                 deeds += count.toString();
                 deeds += ") ";
                 deeds += this.current.title;
-                deeds += "\n";
+                deedArr.push(deeds);
+                deeds = "";
             }
             this.current = this.current.next;
         } while (this.current != this.head);
-        return deeds;
+        return deedArr;
     }
 
     //returns the group number for a given deed
@@ -171,7 +173,7 @@ class List {
         }
 
         this.current = this.head;
-        var groupId = getGroup(deedName);
+        var groupId = this.getGroup(deedName);
 
         if (groupId == "null") {
             return false;
@@ -204,7 +206,7 @@ class List {
     }
 
     sellHome(deedName) {
-        var groupId = getGroup(deedName);
+        var groupId = this.getGroup(deedName);
         var groupDeeds;
         var choice;
         var count = 0;
@@ -258,11 +260,11 @@ class List {
             }
 
             if (h1.houses == h2.houses && h1.houses == h3.houses) {
-                setHouseCount(deedName, -1);
+                this.setHouseCount(deedName, -1);
                 return true;
             }
             else if ((h1.houses - 1 >= h2.houses) && (h1.houses - 1 >= h3.houses)) {
-                setHouseCount(deedName, -1);
+                this.setHouseCount(deedName, -1);
                 return true;
             }
             else {
@@ -326,7 +328,7 @@ class List {
 
             //you can buy if they have the same number of houses or if the choice has less than the other
             if (h1.houses == h2.houses || h1.houses < h2.houses) {
-                setHouseCount(deedName, 1);
+                this.setHouseCount(deedName, 1);
                 return true;
             }
             else {
@@ -357,11 +359,11 @@ class List {
 
             //if they all have equal amounts of houses on them, buy a home
             if (h1.houses == h2.houses && h1.houses == h3.houses) {
-                setHouseCount(deedName, 1);
+                this.setHouseCount(deedName, 1);
                 return true;
             }
             else if ((h1.houses + 1 <= h2.houses) && (h1.houses + 1 <= h3.houses)) {
-                setHouseCount(deedName, 1);
+                this.setHouseCount(deedName, 1);
                 return true;
             }
 
@@ -398,7 +400,7 @@ class List {
             return;
         }
 
-        var groupId = getGroup(deedName);
+        var groupId = this.getGroup(deedName);
         this.current = this.head;
 
         do {
@@ -483,7 +485,7 @@ class List {
             return;
         }
 
-        var groupId = getGroup(deedName);
+        var groupId = this.getGroup(deedName);
         var count = 0;
         this.current = this.head;
 
@@ -495,6 +497,76 @@ class List {
         } while (this.current != this.head);
 
         return count;
+    }
+
+    //checks to see how much rent is owed
+    //pos is the title that the player is on
+    //check to see if there are houses or if they have multiple railroads
+    getTotalRent(pos, roll) {
+        var tempDeed = this.getTitle(pos);
+
+        //dont pay rent for mortgaged properties
+        if(tempDeed.mortgaged == true) {
+            return 0;
+        }
+        //if a player has the full group of properties (not utils or railroads) and there is no housing, rent is double base
+        if(tempDeed.group != 9 && tempDeed.group != 10) {
+            //if they have the group and no houses on that tile
+            if(this.hasGroup(tempDeed.title, tempDeed.owner) && tempDeed.houses == 0) {
+                return parseInt(tempDeed.rent) * 2; //double the base rent
+            }
+            else {
+                if(tempDeed.houses == 0) {
+                    return parseInt(tempDeed.rent);
+                }
+                else if(tempDeed.houses == 1) {
+                    return parseInt(tempDeed.rent1);
+                }
+                else if(tempDeed.houses == 2) {
+                    return parseInt(tempDeed.rent2);
+                }
+                else if(tempDeed.houses == 3) {
+                    return parseInt(tempDeed.rent3);
+                }
+                else if(tempDeed.houses == 4) {
+                    return parseInt(tempDeed.rent4);
+                }
+                else if(tempDeed.houses == 5) {
+                    return parseInt(tempDeed.rentH);
+                }
+            }
+        }
+
+        //if the deed is a railroad
+        if(tempDeed.group == 9) {
+            var totalRail = this.getRails(tempDeed.owner);
+
+            if(totalRail == 1) {
+                return 25;
+            }
+            if(totalRail == 2) {
+                return 50;
+            }
+            if(totalRail == 3) {
+                return 100;
+            }
+            if(totalRail == 4) {
+                return 200;
+            } 
+        }
+
+        //if the deed is a utility
+        if(tempDeed.group == 10) {
+            var totalUtil = this.getUtils(tempDeed.owner);
+
+            if(totalUtil == 1) {
+                return roll * 4;
+            }
+            if(totalUtil == 2) {
+                return roll * 10;
+            }
+        }
+
     }
 
     getTitle(pos) {
@@ -509,6 +581,46 @@ class List {
             pos -= 1;
         }
         return this.current;
+    }
+
+    //returns how many railroads the player owns
+    getRails(player) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+        var count = 0;
+
+        do {
+            if(this.current.group == 9 && this.current.owner == player) {
+                count += 1;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+
+        return count;
+    }
+
+    //returns how many utils the player owns
+    getUtils(player) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+        var count = 0;
+
+        do {
+            if(this.current.group == 10 && this.current.owner == player) {
+                count += 1;
+            }
+            this.current = this.current.next;
+        } while(this.current != this.head);
+
+        return count;
     }
 
     getDeed(deedName) {
@@ -543,7 +655,7 @@ class List {
     }
 
     //returns the name of the nearest utility from current pos
-    getNearistUtil(pos) {
+    getNearestUtil(pos) {
         if(this.head == null) {
             console.log("List is empty");
             return;
@@ -565,7 +677,7 @@ class List {
     }
 
     //returns the name of the nearest railroad from current pos
-    getNearistRail(pos) {
+    getNearestRail(pos) {
         if(this.head == null) {
             console.log("List is empty");
             return;

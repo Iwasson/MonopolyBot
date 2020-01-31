@@ -14,9 +14,6 @@ var chanceDraw = [];
 var chanceDiscard = [];
 var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
 
-var availableHouses = 32;                       //starting number of houses, if 0 then you cant buy a house
-var availableHotels = 12;                       //starting number of hotels, if 0 then you cant buy a hotel
-
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
 var playerRoll = false;                         //flag to see if the player has rolled or not. False means they have not rolled yet, true means they have rolled
@@ -371,24 +368,74 @@ function rollCommand(receivedMessage) {
             drawCard(0);
         }
         //land on chance
-        if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
-            drawCard(1);
+        else if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
+            var check = drawCard(1);
+            //if they advanced to nearest util
+            if(check == 1) {
+                //see if owned
+                if(myList.getTitle(playerList[turnCounter].pos).owner == "null") {
+                    //if unowned then notify they can buy it
+                    generalChannel.send("This utility is unowned, you could buy it!");
+                }
+                //otherwise this tile is owned and you need to pay a specific amount
+                else {
+                    //util says roll 2 die, multiply by 10 then pay that to owner
+                    var die3 = getRandomInt(1, 7);
+                    var die4 = getRandomInt(1, 7);
+                    var tempResult = die3 + die4;
+                    tempResult = tempResult * 10;
+                    playerList[turnCounter].money -= tempResult;
+                    playerList.forEach(element => {
+                        if(element.name == myList.getTitle(playerList[turnCounter].pos).owner) {
+                            element.money += tempResult;
+                        }
+                    });
+                    generalChannel.send("You roll two die and get: " + (die3 + die4) + "\nSo you have to pay " + tempResult + " to " + myList.getTitle(playerList[turnCounter].pos).owner);
+                }
+            }
+            //check if they advanced to nearest railroad
+            if(check == 2) {
+                //if unowned then notify they can buy it
+                if(myList.getTitle(playerList[turnCounter].pos).owner == "null") {
+                    generalChannel.send("This railroad is unowned, you could buy it!");
+                }
+                //otherwise pay double the rent
+                else {
+                    var payment = myList.getTotalRent(playerList[turnCounter].pos, result);
+                    playerList[turnCounter].money -= (payment * 2);
+                }
+            }
         }
         //income tax
-        if (playerList[turnCounter].pos == 4) {
+        else if (playerList[turnCounter].pos == 4) {
             generalChannel.send("You've landed on income tax! Pay $200!");
             playerList[turnCounter].money -= 200;
         }
         //luxury tax
-        if (playerList[turnCounter].pos == 38) {
+        else if (playerList[turnCounter].pos == 38) {
             generalChannel.send("You've landed on luxury tax! Pay $100!");
             playerList[turnCounter].money -= 100;
         }
         //go to jail
-        if (playerList[turnCounter].pos == 30) {
+        else if (playerList[turnCounter].pos == 30) {
             generalChannel.send("You've landed on Go to Jail! Go straight to jail!");
             playerList[turnCounter].pos = 10;
             playerList[turnCounter].jail = 3;
+        }
+        //otherwise pay rent to the person who owns this tile
+        else {
+            var tempDeed = myList.getTitle(playerList[turnCounter].pos);
+            //if someone owns this tile, pay rent
+            if(tempDeed.owner != "null") {
+                var totalRent = myList.getTotalRent(playerList[turnCounter].pos);
+                playerList[turnCounter].money -= totalRent;
+                playerList.forEach(element => {
+                    if(element.name == tempDeed.owner) {
+                        element.money += totalRent;
+                    }
+                });
+                generalChannel.send("You pay " + tempDeed.owner + " $" + totalRent + " for staying at their property");
+            }
         }
     }
 }
@@ -404,13 +451,13 @@ function inspectCommand() {
     tempTile = myList.getTitle(playerList[turnCounter].pos);
     generalChannel.send("You have $" + playerList[turnCounter].money + "\nYou are on: " + tempTile.title);
 
-    ownable = playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 10 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 20 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
+    ownable = playerList[turnCounter].pos != 40 && playerList[turnCounter].pos != 0 && playerList[turnCounter].pos != 2 && playerList[turnCounter].pos != 4 && playerList[turnCounter].pos != 7 && playerList[turnCounter].pos != 10 && playerList[turnCounter].pos != 17 && playerList[turnCounter].pos != 20 && playerList[turnCounter].pos != 22 && playerList[turnCounter].pos != 30 && playerList[turnCounter].pos != 33 && playerList[turnCounter].pos != 36 && playerList[turnCounter].pos != 38;
 
     //only list info for player ownable tiles
     if (tempTile.owner == "null" && ownable) {
         generalChannel.send("This plot is unowned! \nYou can buy it for: $" + tempTile.price);
     }
-    else if (ownable) {
+    else if (ownable && tempTile.mortgaged == false) {
         generalChannel.send("This plot is owned by: " + tempTile.owner + "\nThere are " + tempTile.houses + " houses on this plot.");
         if (tempTile.houses > 0) {
             if (tempTile.houses == 1) {
@@ -433,6 +480,9 @@ function inspectCommand() {
             generalChannel.send("The rent is: $" + tempTile.rent);
         }
     }
+    else if(tempTile.mortgaged == true) {
+        generalChannel.send("This tile is mortgaged!");
+    }
 }
 
 //allows a user to sell a house that they have built on a property
@@ -449,15 +499,15 @@ function sellCommand(arguments) {
             return;
         }
     }
-    if (is_Numeric(arguments[0])) {
+    if (!isNaN(arguments[0])) {
         var choice = parseInt(arguments[0]);
         var options = myList.getDeeds(playerList[turnCounter].name);
 
-        if (choice > options.length + 1) {
+        if (choice > options.length) {
             generalChannel.send("Thats not a valid option.");
         }
         else {
-            var property = options[choice].split(" ");
+            var property = options[choice - 1].toString().split(" ");
             var seller = myList.getDeed(property[1]);
 
             //check to see if there are even any houses to sell
@@ -468,8 +518,8 @@ function sellCommand(arguments) {
 
             //check to see if selling one house upsets the balance
             if (myList.sellHome(deedName)) {
-                playerList[turnCounter].money += seller.priceH;
-                generalChannel.send("You have sold one house on " + seller.title + " for $" + seller.priceH);
+                playerList[turnCounter].money += (seller.priceH / 2);
+                generalChannel.send("You have sold one house on " + seller.title + " for $" + (seller.priceH / 2));
                 return;
             }
             else {
@@ -499,23 +549,25 @@ function buyCommand(arguments) {
             generalChannel.send("You don't have any properties to build houses on!");
             return;
         }
-        if (arguments[1] == null) {
+        if (arguments[0] == null) {
             generalChannel.send("Which property would you like to build a house on? (ex. >buy house 1) \n" + myList.getDeeds(playerList[turnCounter].name));
         }
         //if they send in a second argument 
         else {
             //check to see if they sent in a number
-            if (is_numeric(arguments[2])) {
-                var choice = parseInt(arguments[2]); //store the number in int form
+            if (!isNaN(arguments[1])) {
+                var choice = parseInt(arguments[1]); //store the number in int form
                 var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
 
                 //check to see if the option they provided is greater than the possible options
-                if (choice > options.length + 1) {
+                if (choice > options.length) {
                     generalChannel.send("Thats not a valid option.");
                 }
                 //choice is valid, so see if they have all of the properties in that group
                 else {
-                    var property = options[choice].split(" "); //extract the name of the deed
+                    var property = [];
+                    property = options[choice - 1].toString().split(") "); //extract the name of the deed
+                    
                     //if they have the whole group, then check to see if they are trying to build without balancing
                     //cll will take care of that
                     if (myList.hasGroup(property[1], playerList[turnCounter].name)) {
@@ -594,16 +646,16 @@ function mortgageCommand(arguments) {
         }
     }
     else {
-        if (is_Numeric(arguments[0])) {
+        if (!isNaN(arguments[0])) {
             var choice = parseInt(arguments[0]); //store the number in int form
             var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
 
             //check to see if the option they provided is greater than the possible options
-            if (choice > options.length + 1) {
+            if (choice > options.length) {
                 generalChannel.send("Thats not a valid option.");
             }
             else {
-                var property = options[choice].split(" ");
+                var property = options[choice - 1].toString().split(") ");
 
                 //check to see if any houses are built on that group
                 if (myList.getHouseCount(property[1]) != 0) {
@@ -612,7 +664,7 @@ function mortgageCommand(arguments) {
                 }
                 //if not then mortgage the property, flip the flag and pay the user
                 else {
-                    playerList[turnCounter].money += myList.getDeed(property[1]).mortgage;
+                    playerList[turnCounter].money += parseInt(myList.getDeed(property[1]).mortgage);
                     myList.mortgage(property[1]);
                     generalChannel.send("You have mortgaged " + property[1] + " for $" + myList.getDeed(property[1]).mortgage);
                     return;
@@ -640,17 +692,17 @@ function unmortgageCommand(arguments) {
         }
     }
     else {
-        if (is_Numeric(arguments[0])) {
+        if (!isNaN(arguments[0])) {
             var choice = parseInt(arguments[0]); //store the number in int form
             var options = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
 
             //check to see if the option they provided is greater than the possible options
-            if (choice > options.length + 1) {
+            if (choice > options.length) {
                 generalChannel.send("Thats not a valid option.");
             }
             else {
-                var property = options[choice].split(" ");
-                var uMorPrice = myList.getDeed(property[1]).mortgage + (myList.getDeed(property[1]).mortgage * .1)
+                var property = options[choice - 1].toString().split(") ");
+                var uMorPrice = parseInt(myList.getDeed(property[1]).mortgage) + parseInt(myList.getDeed(property[1]).mortgage * .1)
 
                 if (uMorPrice > playerList[turnCounter].money) {
                     generalChannel.send("You can't afford to Unmortgage that property!");
@@ -659,6 +711,7 @@ function unmortgageCommand(arguments) {
                 else {
                     playerList[turnCounter].money -= uMorPrice;
                     myList.unmortgage(property[1]);
+                    generalChannel.send("You have unmortgaged that property!");
                 }
             }
         }
@@ -764,7 +817,7 @@ function loadCards() {
 function shuffleDeck(deckNum) {
     //shuffle community
     if (deckNum == 0) {
-        while (comDiscard != null) {
+        while (comDiscard.length != 0) {
             var rpos = getRandomInt(0, comDiscard.length);
             comDraw.push(comDiscard[rpos]);
             comDiscard = comDiscard.filter(e => e !== comDiscard[rpos]);
@@ -772,7 +825,7 @@ function shuffleDeck(deckNum) {
     }
     //shuffle chance
     if (deckNum == 1) {
-        while (chanceDiscard != null) {
+        while (chanceDiscard.length != 0) {
             var rpos = getRandomInt(0, chanceDiscard.length);
             chanceDraw.push(chanceDiscard[rpos]);
             chanceDiscard = chanceDiscard.filter(e => e !== chanceDiscard[rpos]);
@@ -781,6 +834,10 @@ function shuffleDeck(deckNum) {
 }
 
 function drawCard(deckNum) {
+    //used to tell if a user has drawn the advance to card
+    //if 1 then they advanced to nearest util, may need to pay x10
+    //if 2 then they advanced to nearest rail, may need to pay x2
+    var check = 0; 
     //draw from community
     if (deckNum == 0) {
         if (comDraw.length == 0) {
@@ -927,6 +984,7 @@ function drawCard(deckNum) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = utilPos;
+                check = 1;
                 break;
             case '5':
                 generalChannel.send(card[1]); //advance to nearest railroad pay x2
@@ -952,6 +1010,7 @@ function drawCard(deckNum) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = railPos;
+                check = 2;
                 break;
             case '6':
                 generalChannel.send(card[1]);
@@ -1024,6 +1083,7 @@ function drawCard(deckNum) {
         }
         chanceDraw = chanceDraw.filter(e => e !== chanceDraw[0]);
     }
+    return check;
 }
 
 //logs bot into the server

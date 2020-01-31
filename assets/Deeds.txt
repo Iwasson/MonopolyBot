@@ -1,7 +1,7 @@
 Go:null/null/null/null/null/null/null/null/null/null/null/false/null
 Mediterranean Avenue:null/0/60/50/30/2/10/30/90/160/250/false/1
 Community Chest:null/null/null/null/null/null/null/null/null/null/null/false/null
-Baltic Avenue:null/0/60/50/4/30/20/60/180/320/450/false/1
+Baltic Avenue:null/0/60/50/30/4/20/60/180/320/450/false/1
 Income Tax:null/null/null/null/null/null/null/null/null/null/null/false/null
 Reading Railroad:null/null/200/null/100/25/50/100/200/null/null/false/null/9
 Oriental Avenue:null/0/100/50/50/6/30/90/270/400/550/false/2
@@ -27,7 +27,7 @@ B & O Railroad:null/null/200/null/100/25/50/100/200/null/null/false/9
 Atlantic Avenue:null/0/260/150/130/22/110/330/800/975/1150/false/6
 Ventnor Avenue:null/0/260/150/130/22/110/330/800/975/1150/false/6
 Water Works:null/null/150/null/75/null/null/null/null/null/null/false/10
-Marvin Gardens:null/0/280150/140/24/120/360/850/1025/1200/false/6
+Marvin Gardens:null/0/280/150/140/24/120/360/850/1025/1200/false/6
 Go To Jail:null/null/null/null/null/null/null/null/null/null/null/false/null
 Pacific Avenue:null/0/300/200/150/26/130/390/900/1100/1275/false/7
 North Carollina Avenue:null/0/300/200/150/26/130/390/900/1100/1275/false/7
