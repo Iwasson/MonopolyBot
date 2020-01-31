@@ -14,9 +14,6 @@ var chanceDraw = [];
 var chanceDiscard = [];
 var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
 
-var availableHouses = 32;                       //starting number of houses, if 0 then you cant buy a house
-var availableHotels = 12;                       //starting number of hotels, if 0 then you cant buy a hotel
-
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
 var playerRoll = false;                         //flag to see if the player has rolled or not. False means they have not rolled yet, true means they have rolled
