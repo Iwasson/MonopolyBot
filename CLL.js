@@ -542,6 +542,50 @@ class List {
         this.current.owner = player;
     }
 
+    //returns the name of the nearest utility from current pos
+    getNearistUtil(pos) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        //need to advance to offset
+        while(pos != 0) {
+            this.current = this.current.next;
+            pos -= 1;
+        }
+
+        //now find the next nearest utility (group id 10)
+        while(this.current.group != 10) {
+            this.current = this.current.next;
+        }
+        return this.current.title;
+    }
+
+    //returns the name of the nearest railroad from current pos
+    getNearistRail(pos) {
+        if(this.head == null) {
+            console.log("List is empty");
+            return;
+        }
+
+        this.current = this.head;
+
+        //need to advance to offset
+        while(pos != 0) {
+            this.current = this.current.next;
+            pos -= 1;
+        }
+
+        //now find the next nearest utility (group id 9)
+        while(this.current.group != 9) {
+            this.current = this.current.next;
+        }
+        return this.current.title;
+    }
+
     getTotalHomes(player) {
         if (this.head == null) {
             console.log("List is empty");
