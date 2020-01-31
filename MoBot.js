@@ -166,6 +166,9 @@ function processCommand(receivedMessage) {
 function helpCommand(arguments) {
     if (arguments[0] != null) { arguments[0] = arguments[0].toLowerCase(); }
     switch (arguments[0]) {
+        case 'bail':
+            generalChannel.send("Buy your way out of jail... you filthy animal ;)");
+            break;
         case 'init':
             generalChannel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ");
             break;
