@@ -512,8 +512,8 @@ function sellCommand(arguments) {
 
             //check to see if selling one house upsets the balance
             if (myList.sellHome(deedName)) {
-                playerList[turnCounter].money += seller.priceH;
-                generalChannel.send("You have sold one house on " + seller.title + " for $" + seller.priceH);
+                playerList[turnCounter].money += (seller.priceH / 2);
+                generalChannel.send("You have sold one house on " + seller.title + " for $" + (seller.priceH / 2));
                 return;
             }
             else {
