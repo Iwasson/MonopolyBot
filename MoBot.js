@@ -167,6 +167,9 @@ function processCommand(receivedMessage) {
 function helpCommand(arguments) {
     if (arguments[0] != null) { arguments[0] = arguments[0].toLowerCase(); }
     switch (arguments[0]) {
+        case 'bail':
+            generalChannel.send("Buy your way out of jail... you filthy animal ;)");
+            break;
         case 'init':
             generalChannel.send("Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ");
             break;
@@ -183,7 +186,7 @@ function helpCommand(arguments) {
             generalChannel.send("Loads a saved game");
             break;
         default:
-            generalChannel.send("List of Commands: \nInit\nStart\nRoll\nSave\nLoad")
+            generalChannel.send("List of Commands: \nBail\tBuy\nDebug\tDeeds\nDisplay\tEnd\nHelp\tImg\nInit\tInspect\nLoad\tMortgage\nPoke\tReroll\nRoll\tSave\nSell\tStart\nStop\tUnmortgage")
             break;
     }
 }
@@ -261,7 +264,7 @@ async function addPlayer(arguments, receivedMessage) {
     player = new Object();                      //Creates a new player to be pushed to players array
     player.playerID = receivedMessage.author.id;//player id is the id of the person who called the init command
     player.name = receivedMessage.author.toString();
-    player.money = 1500;                        //starting money for each player
+    player.money = -5;                        //starting money for each player
     player.property = null;                     //Start with no properties
     player.piece = null;                          //What piece did the player pick?
     player.pos = 0;                             //stores the location of the player
@@ -368,9 +371,9 @@ function rollCommand(receivedMessage) {
         else if (playerList[turnCounter].pos == 7 || playerList[turnCounter].pos == 22 || playerList[turnCounter].pos == 36) {
             var check = drawCard(1);
             //if they advanced to nearest util
-            if(check == 1) {
+            if (check == 1) {
                 //see if owned
-                if(myList.getTitle(playerList[turnCounter].pos).owner == "null") {
+                if (myList.getTitle(playerList[turnCounter].pos).owner == "null") {
                     //if unowned then notify they can buy it
                     generalChannel.send("This utility is unowned, you could buy it!");
                 }
@@ -383,7 +386,7 @@ function rollCommand(receivedMessage) {
                     tempResult = tempResult * 10;
                     playerList[turnCounter].money -= tempResult;
                     playerList.forEach(element => {
-                        if(element.name == myList.getTitle(playerList[turnCounter].pos).owner) {
+                        if (element.name == myList.getTitle(playerList[turnCounter].pos).owner) {
                             element.money += tempResult;
                         }
                     });
@@ -391,9 +394,9 @@ function rollCommand(receivedMessage) {
                 }
             }
             //check if they advanced to nearest railroad
-            if(check == 2) {
+            if (check == 2) {
                 //if unowned then notify they can buy it
-                if(myList.getTitle(playerList[turnCounter].pos).owner == "null") {
+                if (myList.getTitle(playerList[turnCounter].pos).owner == "null") {
                     generalChannel.send("This railroad is unowned, you could buy it!");
                 }
                 //otherwise pay double the rent
@@ -423,11 +426,11 @@ function rollCommand(receivedMessage) {
         else {
             var tempDeed = myList.getTitle(playerList[turnCounter].pos);
             //if someone owns this tile, pay rent
-            if(tempDeed.owner != "null") {
+            if (tempDeed.owner != "null") {
                 var totalRent = myList.getTotalRent(playerList[turnCounter].pos);
                 playerList[turnCounter].money -= totalRent;
                 playerList.forEach(element => {
-                    if(element.name == tempDeed.owner) {
+                    if (element.name == tempDeed.owner) {
                         element.money += totalRent;
                     }
                 });
@@ -477,7 +480,7 @@ function inspectCommand() {
             generalChannel.send("The rent is: $" + tempTile.rent);
         }
     }
-    else if(tempTile.mortgaged == true) {
+    else if (tempTile.mortgaged == true) {
         generalChannel.send("This tile is mortgaged!");
     }
 }
@@ -564,7 +567,7 @@ function buyCommand(arguments) {
                 else {
                     var property = [];
                     property = options[choice - 1].toString().split(") "); //extract the name of the deed
-                    
+
                     //if they have the whole group, then check to see if they are trying to build without balancing
                     //cll will take care of that
                     if (myList.hasGroup(property[1], playerList[turnCounter].name)) {
@@ -573,7 +576,7 @@ function buyCommand(arguments) {
                             return;
                         }
                         else {
-                            if(myList.getDeed[property[1]].houses == 5) {
+                            if (myList.getDeed[property[1]].houses == 5) {
                                 generalChannel.send("You already have a hotel on that property, you can't buy any more houses!");
                                 return;
                             }
@@ -739,18 +742,59 @@ function endTurn() {
         generalChannel.send("You haven't rolled yet!");
         return;
     }
-
-    generalChannel.send("Ending your turn...");
-    ++turnCounter;      //advance the turn counter by 1
-    playerRoll = false; //resets the flag for players rolling
-    doubleCounter = 0;  //resets how many doubles have been rolled.
-
-    //should roll back to 0 after the last player has gone, should work regardless of how many players
-    if (turnCounter == playerList.length) {
-        turnCounter = 0;
+    var con = bankrupt();
+    if (con = -1){
+        if (playerList.length < 2){
+            generalChannel.send("Congrats " + playerList[turnCounter].name + "! You are the winner of Monopoly")
+            //end le game
+        }
+        else{
+            if (turnCounter == (playerList.length - 1)){
+                playerList = playerList.filter(e => e !== playerList[turnCounter]);
+                generalChannel.send("Ending your turn...");
+                ++turnCounter;      //advance the turn counter by 1
+                playerRoll = false; //resets the flag for players rolling
+                doubleCounter = 0;  //resets how many doubles have been rolled.
+            
+                //should roll back to 0 after the last player has gone, should work regardless of how many players
+                if (turnCounter >= playerList.length) {
+                    turnCounter = 0;
+                }
+            
+                generalChannel.send(playerList[turnCounter].name + "'s turn!");
+            }
+            else {
+                playerList = playerList.filter(e => e !== playerList[turnCounter]);
+                generalChannel.send("Ending your turn...");
+                playerRoll = false; //resets the flag for players rolling
+                doubleCounter = 0;  //resets how many doubles have been rolled.
+            
+                //should roll back to 0 after the last player has gone, should work regardless of how many players
+                if (turnCounter == playerList.length) {
+                    turnCounter = 0;
+                }
+            
+                generalChannel.send(playerList[turnCounter].name + "'s turn!");
+            } 
+        }
     }
-
-    generalChannel.send(playerList[turnCounter].name + "'s turn!");
+    if (con = 0){
+        generalChannel.send("Ending your turn...");
+        ++turnCounter;      //advance the turn counter by 1
+        playerRoll = false; //resets the flag for players rolling
+        doubleCounter = 0;  //resets how many doubles have been rolled.
+    
+        //should roll back to 0 after the last player has gone, should work regardless of how many players
+        if (turnCounter == playerList.length) {
+            turnCounter = 0;
+        }
+    
+        generalChannel.send(playerList[turnCounter].name + "'s turn!");
+    }
+    if (con = 1){
+        generalChannel.send("You do not have enough money to end your turn, try selling something first!")
+        return;
+    }
 }
 
 //saves the current state of the game. Useful if the bot goes down, or if discord goes down
@@ -834,7 +878,7 @@ function drawCard(deckNum) {
     //used to tell if a user has drawn the advance to card
     //if 1 then they advanced to nearest util, may need to pay x10
     //if 2 then they advanced to nearest rail, may need to pay x2
-    var check = 0; 
+    var check = 0;
     //draw from community
     if (deckNum == 0) {
         if (comDraw.length == 0) {
@@ -875,7 +919,7 @@ function drawCard(deckNum) {
             case '7':
                 generalChannel.send(card[1]);
                 playerList.forEach(element => {
-                    if(element != playerList[turnCounter]) {
+                    if (element != playerList[turnCounter]) {
                         element.money -= 50;
                         playerList[turnCounter].money += 50;
                     }
@@ -908,12 +952,12 @@ function drawCard(deckNum) {
             case '14':
                 generalChannel.send(card[1]); //pay $40 house and $115 per hotel
                 var counts = myList.getTotalHomes(playerList[turnCounter].name);
-                while(counts[0] != 0) {
+                while (counts[0] != 0) {
                     playerList[turnCounter].money -= 40;
                     counts[0] -= 1;
                 }
 
-                while(counts[1] != 0) {
+                while (counts[1] != 0) {
                     playerList[turnCounter].money -= 115;
                     counts[1] -= 1;
                 }
@@ -929,7 +973,7 @@ function drawCard(deckNum) {
                 break;
         }
         //dont put the get out of jail card back onto the discard pile
-        if(card[0] != '5') {
+        if (card[0] != '5') {
             comDiscard.push(comDraw[0]);
         }
         comDraw = comDraw.filter(e => e !== comDraw[0]);
@@ -951,14 +995,14 @@ function drawCard(deckNum) {
             case '2':
                 generalChannel.send(card[1]);
                 //advance to illinois if pos is > illinois then you "advanced past go"
-                if(playerList[turnCounter].pos > 24) {
+                if (playerList[turnCounter].pos > 24) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = 24;
                 break;
             case '3':
                 generalChannel.send(card[1]);
-                if(playerList[turnCounter].pos > 11) {
+                if (playerList[turnCounter].pos > 11) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = 11;
@@ -967,17 +1011,17 @@ function drawCard(deckNum) {
                 generalChannel.send(card[1]); //advance to nearest utility throw two die and pay 10 times that amount
                 var nearUtil = myList.getNearestUtil(playerList[turnCounter].pos);
                 var utilPos;
-                if(nearUtil == "Electric Company") {
+                if (nearUtil == "Electric Company") {
                     utilPos = 12;
                 }
-                else if(nearUtil == "Water Works") {
+                else if (nearUtil == "Water Works") {
                     utilPos = 28;
                 }
                 else {
                     console.log("error: couldnt find nearest util");
                     return;
                 }
-                if(playerList[turnCounter].pos > utilPos) {
+                if (playerList[turnCounter].pos > utilPos) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = utilPos;
@@ -987,23 +1031,23 @@ function drawCard(deckNum) {
                 generalChannel.send(card[1]); //advance to nearest railroad pay x2
                 var nearRail = myList.getNearestRail(playerList[turnCounter].pos);
                 var railPos;
-                if(nearRail == "Reading Railroad") {
+                if (nearRail == "Reading Railroad") {
                     railPos = 5;
                 }
-                else if(nearRail == "Pennsylvania Railroad") {
+                else if (nearRail == "Pennsylvania Railroad") {
                     railPos = 15;
                 }
-                else if(nearRail == "B & O Railroad") {
+                else if (nearRail == "B & O Railroad") {
                     railPos = 25;
                 }
-                else if(nearRail == "Short Line") {
+                else if (nearRail == "Short Line") {
                     railPos = 35;
                 }
                 else {
                     console.log("error: couldnt find nearest rail");
                     return;
                 }
-                if(playerList[turnCounter].pos > railPos) {
+                if (playerList[turnCounter].pos > railPos) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = railPos;
@@ -1030,12 +1074,12 @@ function drawCard(deckNum) {
             case '10':
                 generalChannel.send(card[1]); //pay 25 per house and 100 per hotel
                 var counts = myList.getTotalHomes(playerList[turnCounter].name);
-                while(counts[0] != 0) {
+                while (counts[0] != 0) {
                     playerList[turnCounter].money -= 25;
                     counts[0] -= 1;
                 }
 
-                while(counts[1] != 0) {
+                while (counts[1] != 0) {
                     playerList[turnCounter].money -= 100;
                     counts[1] -= 1;
                 }
@@ -1046,7 +1090,7 @@ function drawCard(deckNum) {
                 break;
             case '12':
                 generalChannel.send(card[1]);
-                if(playerList[turnCounter].pos > 5) {
+                if (playerList[turnCounter].pos > 5) {
                     playerList[turnCounter].money += 200;
                 }
                 playerList[turnCounter].pos = 5;
@@ -1058,7 +1102,7 @@ function drawCard(deckNum) {
             case '14':
                 generalChannel.send(card[1]); //pay each player 50
                 playerList.forEach(element => {
-                    if(element != playerList[turnCounter]) {
+                    if (element != playerList[turnCounter]) {
                         element.money += 50;
                         playerList[turnCounter].money -= 50;
                     }
@@ -1075,7 +1119,7 @@ function drawCard(deckNum) {
         }
 
         //dont put the get out of jail free card back into the discard pile
-        if(card[0] != '7') {
+        if (card[0] != '7') {
             chanceDiscard.push(chanceDraw[0]);
         }
         chanceDraw = chanceDraw.filter(e => e !== chanceDraw[0]);
@@ -1083,5 +1127,17 @@ function drawCard(deckNum) {
     return check;
 }
 
+function bankrupt() {
+    if (playerList[turnCounter].money < 0) {
+        if (myList.getDeeds(playerList[turnCounter]).length <= 0) {
+            return -1;
+        }
+        else {
+            generalChannel.send("You do not have enough money to end the round, try selling some properties or houses.")
+            return 1;
+        }
+    }
+    return 0;
+}
 //logs bot into the server
 client.login(auth.token)

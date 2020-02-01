@@ -13,4 +13,5 @@ NPM installs
 TODO
 ===================
 - [x] Make a list, check it twice ;)
-- [ ] Add images to the player peices instead of colors.
+- [x] Add images to the player peices instead of colors.
+  - [ ] Add local imgs not from the interwebs
