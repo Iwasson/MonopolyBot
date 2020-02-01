@@ -3,16 +3,18 @@ const auth = require('./auth.json')             //auth tokens for logging into b
 const client = new Discord.Client()             //create a new discord client for the bot
 
 const Canvas = require('canvas')                //used to draw on images
-const { createCanvas, loadImage } = require('canvas')
+const { createCanvas, loadImage } = require('canvas')   //dont know what this does
 
 var player;                                     //define struct
 var playerList = []                             //hold the players for game
 var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use 
-var comDraw = [];
-var comDiscard = [];
-var chanceDraw = [];
-var chanceDiscard = [];
+var comDraw = [];                               //stores the draw pile of community chest cards
+var comDiscard = [];                            //stores the discard pile of community chest cards
+var chanceDraw = [];                            //stores the draw pile of chance cards
+var chanceDiscard = [];                         //stores the discard pile of chance cards
 var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
+
+var tradeFlag = false;                          //when tripped, will trap users in a trade interface, making the trade experience much nicer
 
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
@@ -86,80 +88,108 @@ function processCommand(receivedMessage) {
     primaryCommand = primaryCommand.toLowerCase();      //sets the command to lowercase
     let arguments = splitCommand.slice(1)               //sets an array of arguments
 
-    switch (primaryCommand) {
-        case 'help':
-            helpCommand(arguments);
-            break;
-        case 'start':
-            startCommand(arguments);
-            break;
-        case 'load':
-            loadSave();
-            break;
-        case 'init':
-            initCommand(arguments, receivedMessage);
-            break;
-        case 'img':
-            imgCommand(arguments);
-            break;
-        case 'debug':
-            debug(arguments, receivedMessage);
-            break;
-        case 'roll':
-            if (turn(playerList, receivedMessage))
-                rollCommand(receivedMessage);
-            break;
-        case 'inspect':
-            if (turn(playerList, receivedMessage))
-                inspectCommand();
-            break;
-        case 'bail':
-            if (turn(playerList, receivedMessage))
-                bailCommand(receivedMessage);
-            break;
-        case 'deeds':
-            deedCommand(receivedMessage);
-            break;
-        case 'buy':
-            if (turn(playerList, receivedMessage))
-                buyCommand(arguments);
-            break;
-        case 'sell':
-            if (turn(playerList, receivedMessage))
-                sellCommand(arguments);
-            break;
-        case 'mortgage':
-            if (turn(playerList, receivedMessage))
-                mortgageCommand(arguments);
-            break;
-        case 'unmortgage':
-            if (turn(playerList, receivedMessage))
-                unmortgageCommand(arguments);
-            break;
-        case 'reroll':
-            generalChannel.send("Reseting roll");
-            playerRoll = false;
-            break;
-        case 'save':
-            saveCommand(arguments);
-            break;
-        case 'display':
-            displayCommand(arguments);
-            break;
-        case 'end':
-            if (turn(receivedMessage))
-                endTurn();
-            break;
-        case 'stop':
-            generalChannel.send("Force ending the game!");
-            gameStart = false;
-            break;
-        case 'poke':
-            pokeCommand();
-            break;
-        default:
-            generalChannel.send("I don't understand the request")
-            break
+    //used to check if a user is currently attempting to trade with someone
+    if (tradeFlag == true) {
+        switch (primaryCommand) {
+            case 'help':
+                generalChannel.send("Type >stop to end trade mode \nType >select <username> to select which player you want to trade with\nType >inspect <username> to find out what another player has\nType >give <money/deeds/Get out of jail card> to add something to give to another player\nType >receive <money/deeds/Get out of jail card> to add something you want from another player\nType >propose to send the offer to the selected player");
+                break;
+            case 'stop':
+                generalChannel.send("Exiting Trading mode!");
+                tradeFlag = false;
+                break;
+            case 'select':
+                break;
+            case 'give':
+                break;
+            case 'receive':
+                break;
+            case 'propose':
+                break;
+        }
+    }
+    else {
+        switch (primaryCommand) {
+            case 'help':
+                helpCommand(arguments);
+                break;
+            case 'start':
+                startCommand(arguments);
+                break;
+            case 'load':
+                loadSave();
+                break;
+            case 'init':
+                initCommand(arguments, receivedMessage);
+                break;
+            case 'img':
+                imgCommand(arguments);
+                break;
+            case 'debug':
+                debug(arguments, receivedMessage);
+                break;
+            case 'roll':
+                if (turn(playerList, receivedMessage))
+                    rollCommand(receivedMessage);
+                break;
+            case 'inspect':
+                if (turn(playerList, receivedMessage))
+                    inspectCommand();
+                break;
+            case 'bail':
+                if (turn(playerList, receivedMessage))
+                    bailCommand(receivedMessage);
+                break;
+            case 'deeds':
+                deedCommand(receivedMessage);
+                break;
+            case 'buy':
+                if (turn(playerList, receivedMessage))
+                    buyCommand(arguments);
+                break;
+            case 'sell':
+                if (turn(playerList, receivedMessage))
+                    sellCommand(arguments);
+                break;
+            case 'mortgage':
+                if (turn(playerList, receivedMessage))
+                    mortgageCommand(arguments);
+                break;
+            case 'unmortgage':
+                if (turn(playerList, receivedMessage))
+                    unmortgageCommand(arguments);
+                break;
+            case 'reroll':
+                generalChannel.send("Reseting roll");
+                playerRoll = false;
+                break;
+            case 'save':
+                saveCommand(arguments);
+                break;
+            /* for debugging only
+            case 'display':
+                displayCommand(arguments);
+                break;
+            */
+            case 'end':
+                if (turn(receivedMessage))
+                    endTurn();
+                break;
+            case 'trade':
+                generalChannel.send("Entering Trade mode!");
+                tradeFlag = true;
+                break;
+            case 'stop':
+                generalChannel.send("Force ending the game!");
+                gameStart = false;
+                break;
+            case 'poke':
+                pokeCommand();
+                break;
+            default:
+                generalChannel.send("I don't understand the request")
+                break;
+        }
     }
 }
 
@@ -186,7 +216,7 @@ function helpCommand(arguments) {
             generalChannel.send("Loads a saved game");
             break;
         default:
-            generalChannel.send("List of Commands: \nBail\tBuy\nDebug\tDeeds\nDisplay\tEnd\nHelp\tImg\nInit\tInspect\nLoad\tMortgage\nPoke\tReroll\nRoll\tSave\nSell\tStart\nStop\tUnmortgage")
+            generalChannel.send("List of Commands: \nBail\tBuy\nDebug\tDeeds\nTrade\tEnd\nHelp\tImg\nInit\tInspect\nLoad\tMortgage\nPoke\tReroll\nRoll\tSave\nSell\tStart\nStop\tUnmortgage")
             break;
     }
 }
@@ -264,7 +294,7 @@ async function addPlayer(arguments, receivedMessage) {
     player = new Object();                      //Creates a new player to be pushed to players array
     player.playerID = receivedMessage.author.id;//player id is the id of the person who called the init command
     player.name = receivedMessage.author.toString();
-    player.money = -5;                        //starting money for each player
+    player.money = 1500;                        //starting money for each player
     player.property = null;                     //Start with no properties
     player.piece = null;                          //What piece did the player pick?
     player.pos = 0;                             //stores the location of the player
@@ -743,24 +773,24 @@ function endTurn() {
         return;
     }
     var con = bankrupt();
-    if (con = -1){
-        if (playerList.length < 2){
+    if (con = -1) {
+        if (playerList.length < 2) {
             generalChannel.send("Congrats " + playerList[turnCounter].name + "! You are the winner of Monopoly")
             //end le game
         }
-        else{
-            if (turnCounter == (playerList.length - 1)){
+        else {
+            if (turnCounter == (playerList.length - 1)) {
                 playerList = playerList.filter(e => e !== playerList[turnCounter]);
                 generalChannel.send("Ending your turn...");
                 ++turnCounter;      //advance the turn counter by 1
                 playerRoll = false; //resets the flag for players rolling
                 doubleCounter = 0;  //resets how many doubles have been rolled.
-            
+
                 //should roll back to 0 after the last player has gone, should work regardless of how many players
                 if (turnCounter >= playerList.length) {
                     turnCounter = 0;
                 }
-            
+
                 generalChannel.send(playerList[turnCounter].name + "'s turn!");
             }
             else {
@@ -768,30 +798,30 @@ function endTurn() {
                 generalChannel.send("Ending your turn...");
                 playerRoll = false; //resets the flag for players rolling
                 doubleCounter = 0;  //resets how many doubles have been rolled.
-            
+
                 //should roll back to 0 after the last player has gone, should work regardless of how many players
                 if (turnCounter == playerList.length) {
                     turnCounter = 0;
                 }
-            
+
                 generalChannel.send(playerList[turnCounter].name + "'s turn!");
-            } 
+            }
         }
     }
-    if (con = 0){
+    if (con = 0) {
         generalChannel.send("Ending your turn...");
         ++turnCounter;      //advance the turn counter by 1
         playerRoll = false; //resets the flag for players rolling
         doubleCounter = 0;  //resets how many doubles have been rolled.
-    
+
         //should roll back to 0 after the last player has gone, should work regardless of how many players
         if (turnCounter == playerList.length) {
             turnCounter = 0;
         }
-    
+
         generalChannel.send(playerList[turnCounter].name + "'s turn!");
     }
-    if (con = 1){
+    if (con = 1) {
         generalChannel.send("You do not have enough money to end your turn, try selling something first!")
         return;
     }
@@ -814,7 +844,7 @@ function displayCommand(arguments) {
 async function imgCommand(arguments, ) {
     const canvas = Canvas.createCanvas(1950, 1950);
     const ctx = canvas.getContext('2d');
-    const background = await Canvas.loadImage('./assets/Board.jpg');
+    const background = await Canvas.loadImage('./assets/Monopoly_Board.png');
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
     ctx.strokeStyle = '#74037b';
@@ -823,10 +853,10 @@ async function imgCommand(arguments, ) {
     //76.9230769 => length of each square, corners are 2x that amount so to get to square 2 it would be 76.9230769*3
     //871.1538459 is the bottom row
     //ctx.drawImage(avatar, 538.4615383, 871.1538459, 50, 50);
-    const avatars = [await Canvas.loadImage("https://bbts1.azureedge.net/images/p/full/2016/10/2bed1448-1d59-4bbc-a47d-534c35b3b040.jpg"),
-    await Canvas.loadImage("https://i.ebayimg.com/images/g/8PoAAOSwt05ZqtAL/s-l300.png"),
-    await Canvas.loadImage("https://i0.wp.com/richonmoney.com/wordpress/wp-content/uploads/2016/06/monopoly-man.gif"),
-    await Canvas.loadImage("https://i.ebayimg.com/images/g/w8wAAOSwovNaOcjE/s-l300.png")];
+    const avatars = [await Canvas.loadImage("./assets/carAvatar.png"),
+    await Canvas.loadImage("./assets/hatAvatar.png"),
+    await Canvas.loadImage("./assets/shoeAvatar.png"),
+    await Canvas.loadImage("./assets/thimbleAvatar.png")];
     for (var i = 0; i < playerList.length; ++i) {
         ctx.drawImage(avatars[playerList[i].piece], boardCoords[playerList[i].pos][0], boardCoords[playerList[i].pos][1], 50, 50);
     }
@@ -1125,6 +1155,12 @@ function drawCard(deckNum) {
         chanceDraw = chanceDraw.filter(e => e !== chanceDraw[0]);
     }
     return check;
+}
+
+//allows a player to trade money and properties back and forth
+//can only be initiated by current turn player
+function tradeCommand() {
+
 }
 
 function bankrupt() {
