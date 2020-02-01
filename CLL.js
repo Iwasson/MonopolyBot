@@ -139,6 +139,9 @@ class List {
                 deeds += count.toString();
                 deeds += ") ";
                 deeds += this.current.title;
+                if(this.current.mortgaged == true) {
+                    deeds += "\t(Mortgaged)";
+                }
                 deedArr.push(deeds);
                 deeds = "";
             }

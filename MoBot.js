@@ -15,6 +15,7 @@ var chanceDiscard = [];                         //stores the discard pile of cha
 var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
 
 var tradeFlag = false;                          //when tripped, will trap users in a trade interface, making the trade experience much nicer
+var tradeTo;                                    //stores who the player wants to trade with
 
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
@@ -89,7 +90,7 @@ function processCommand(receivedMessage) {
     let arguments = splitCommand.slice(1)               //sets an array of arguments
 
     //used to check if a user is currently attempting to trade with someone
-    if (tradeFlag == true) {
+    if (tradeFlag == true && turn(playerList, receivedMessage)) {
         switch (primaryCommand) {
             case 'help':
                 generalChannel.send("Type >stop to end trade mode \nType >select <username> to select which player you want to trade with\nType >inspect <username> to find out what another player has\nType >give <money/deeds/Get out of jail card> to add something to give to another player\nType >receive <money/deeds/Get out of jail card> to add something you want from another player\nType >propose to send the offer to the selected player");
@@ -97,8 +98,55 @@ function processCommand(receivedMessage) {
             case 'stop':
                 generalChannel.send("Exiting Trading mode!");
                 tradeFlag = false;
+                tradeTo = null;
                 break;
             case 'select':
+                //get all of the usernames of the people playing the game other than yourself
+                if (arguments.length == 0) {
+                    var options = [];
+                    playerList.forEach(element => {
+                        if (element.name != playerList[turnCounter].name) {
+                            options.push(element.nick + "\n");
+                        }
+                    });
+                    //print out the people who you can trade with
+                    generalChannel.send("Who would you like to trade with:\n" + options);
+                }
+                else {
+                    playerList.forEach(element => {
+                        //check to see if the provided username is correct, also cant trade with yourself
+                        if (element.nick.toLowerCase() == arguments[0].toLowerCase() && arguments[0].toLowerCase() != playerList[turnCounter].nick.toLowerCase()) {
+                            tradeTo = element;
+                        }
+                    });
+                    //if they provided an incorrect username
+                    if (tradeTo == null) {
+                        generalChannel.send("Thats not a valid choice...");
+                    }
+                    //otherwise let them know selection worked
+                    else {
+                        generalChannel.send("Player selected!");
+                    }
+                }
+                break;
+            case 'inspect':
+                if (arguments.length == 0) {
+                    var options = [];
+                    playerList.forEach(element => {
+                        if (element.name != playerList[turnCounter].name) {
+                            options.push(element.nick + "\n");
+                        }
+                    });
+                    generalChannel.send("Who would you like to inspect?\n" + options);
+                }
+                else {
+                    playerList.forEach(element => {
+                        //inspect a player and see what they have
+                        if (element.nick.toLowerCase() == arguments[0].toLowerCase()) {
+                            deedCommand(receivedMessage, element.nick.toLowerCase());
+                        }
+                    });
+                }
                 break;
             case 'give':
                 break;
@@ -141,7 +189,7 @@ function processCommand(receivedMessage) {
                     bailCommand(receivedMessage);
                 break;
             case 'deeds':
-                deedCommand(receivedMessage);
+                deedCommand(receivedMessage, null);
                 break;
             case 'buy':
                 if (turn(playerList, receivedMessage))
@@ -294,6 +342,9 @@ async function addPlayer(arguments, receivedMessage) {
     player = new Object();                      //Creates a new player to be pushed to players array
     player.playerID = receivedMessage.author.id;//player id is the id of the person who called the init command
     player.name = receivedMessage.author.toString();
+
+    var tempString = receivedMessage.member.user.tag.split("#");
+    player.nick = tempString[0];
     player.money = 1500;                        //starting money for each player
     player.property = null;                     //Start with no properties
     player.piece = null;                          //What piece did the player pick?
@@ -301,6 +352,7 @@ async function addPlayer(arguments, receivedMessage) {
     player.getOutCard = 0;                      //set to 1 if they have a get out of jail card and 2 if they have two of them
     player.jail = 0;                            //set to 3 when sent to jail, decrement by 1 each turn they dont leave
     player.number = playerList.length;
+
     playerList.push(player);
     if (arguments == "car") {
         player.piece = 0;
@@ -762,8 +814,33 @@ function bailCommand(receivedMessage) {
     }
 }
 
-function deedCommand(receivedMessage) {
-    generalChannel.send(myList.getDeeds(receivedMessage.author.toString()));
+function deedCommand(receivedMessage, player) {
+    if (player == null) {
+        var tempDeeds = myList.getDeeds(receivedMessage.author.toString());
+        if (tempDeeds == null) {
+            generalChannel.send("You have no deeds!");
+        }
+        else {
+            generalChannel.send(tempDeeds);
+        }
+    }
+    else if (player != null) {
+        var tempDeeds;
+        playerList.forEach(element => {
+            if (element.nick.toLowerCase() == player.toLowerCase()) {
+                tempDeeds = myList.getDeeds(element.name);
+            }
+        });
+        if (tempDeeds == null) {
+            generalChannel.send("They have no deeds!");
+        }
+        else {
+            generalChannel.send(tempDeeds);
+        }
+    }
+    else {
+        generalChannel.send("Not a valid Request...");
+    }
 }
 
 //ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
@@ -773,7 +850,7 @@ function endTurn() {
         return;
     }
     var con = bankrupt();
-    if (con = -1) {
+    if (con == -1) {
         if (playerList.length < 2) {
             generalChannel.send("Congrats " + playerList[turnCounter].name + "! You are the winner of Monopoly")
             //end le game
@@ -808,7 +885,7 @@ function endTurn() {
             }
         }
     }
-    if (con = 0) {
+    if (con == 0) {
         generalChannel.send("Ending your turn...");
         ++turnCounter;      //advance the turn counter by 1
         playerRoll = false; //resets the flag for players rolling
@@ -821,7 +898,7 @@ function endTurn() {
 
         generalChannel.send(playerList[turnCounter].name + "'s turn!");
     }
-    if (con = 1) {
+    if (con == 1) {
         generalChannel.send("You do not have enough money to end your turn, try selling something first!")
         return;
     }
