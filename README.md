@@ -12,6 +12,9 @@ NPM installs
 
 TODO
 ===================
-- [x] Make a list, check it twice ;)
-- [x] Add images to the player peices instead of colors.
-  - [x] Add local imgs not from the interwebs
+- [ ] Finish Trade command
+- [ ] Test Bankruptcy
+- [ ] Test Buying houses
+- [ ] Test Selling houses
+- [ ] Test that rent is correctly dealt with
+- [ ] Implement a "Roll for who goes first" feature
