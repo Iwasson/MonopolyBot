@@ -15,7 +15,12 @@ var chanceDiscard = [];                         //stores the discard pile of cha
 var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
 
 var tradeFlag = false;                          //when tripped, will trap users in a trade interface, making the trade experience much nicer
+var proposeFlag = false;                        //when tripped will make it so that current player cannot advance their turn and player that was sent an offer must reply to trade deal
 var tradeTo;                                    //stores who the player wants to trade with
+var moneyTo = 0;                                //stores how much money player A will give to player B
+var moneyFrom = 0;                              //stroes how much money player B will give to player A
+var deedsTo = [];                               //stores the deeds that player A will give to player B
+var deedsFrom = [];                             //stores the deeds that player B will give to Player A
 
 var turnCounter = 0;                            //holds which players turn it currently is, goes from 0 to #players-1 
 var gameStart = false;                          //flag for the start of the game, allows more functions to be called once the game has started
@@ -149,10 +154,26 @@ function processCommand(receivedMessage) {
                 }
                 break;
             case 'give':
+                //if no args, print out what you have to offer
+                if (arguments.length == 0) {
+                    generalChannel.send("What would you like to offer?\n");
+                    deedCommand(receivedMessage, null);
+                }
                 break;
             case 'receive':
+                if (arguments.length == 0) {
+                    if (tradeTo == null) {
+                        generalChannel.send("Please select a player to trade with first!");
+                    }
+                    else {
+                        generalChannel.send("What would you like to gain?\n");
+                        deedCommand(receivedMessage, tradeTo.nick.toLowerCase());
+                    }
+                }
                 break;
             case 'propose':
+                generalChannel.send("Commiting proposal to " + tradeTo.name);
+                generalChannel.send("You are offering: \tThey are giving: " + "\n");
                 break;
         }
     }
