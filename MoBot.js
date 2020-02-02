@@ -12,7 +12,8 @@ var comDraw = [];                               //stores the draw pile of commun
 var comDiscard = [];                            //stores the discard pile of community chest cards
 var chanceDraw = [];                            //stores the draw pile of chance cards
 var chanceDiscard = [];                         //stores the discard pile of chance cards
-var getOutOfJail = [];                          //stores the get out of jail free cards if drawn
+var getOutOfJailCom = [];                       //stores the community get out of jail free card
+var getOutOfJailChance = [];                    //stores the chance get out of jail free card
 
 var tradeFlag = false;                          //when tripped, will trap users in a trade interface, making the trade experience much nicer
 var proposeFlag = false;                        //when tripped will make it so that current player cannot advance their turn and player that was sent an offer must reply to trade deal
@@ -289,9 +290,11 @@ function processCommand(receivedMessage) {
             case 'img':
                 imgCommand(arguments);
                 break;
+            /*
             case 'debug':
                 debug(arguments, receivedMessage);
                 break;
+            */
             case 'roll':
                 if (turn(playerList, receivedMessage))
                     rollCommand(receivedMessage);
@@ -323,10 +326,12 @@ function processCommand(receivedMessage) {
                 if (turn(playerList, receivedMessage))
                     unmortgageCommand(arguments);
                 break;
+            /*
             case 'reroll':
                 generalChannel.send("Reseting roll");
                 playerRoll = false;
                 break;
+            */
             case 'save':
                 saveCommand(arguments);
                 break;
@@ -926,9 +931,30 @@ function unmortgageCommand(arguments) {
 }
 
 function bailCommand(receivedMessage) {
-    if (playerList[turnCounter].jail > 0) {
+    if (playerList[turnCounter].jail > 0 && playerList[turnCounter].getOutCard == 0) {
         generalChannel.send("You have paid your bail! -$50");
         playerList[turnCounter].money -= 50;
+    }
+    //see if they have a card from community chest
+    else if(playerList[turnCounter].jail > 0 && playerList[turnCounter].getOutCard == 1) {
+        generalChannel.send("Using your Get out of Jail Free Card!");
+        comDiscard.push(getOutOfJailCom[0]);
+        getOutOfJailCom = null;
+        playerList[turnCounter].getOutCard = 0;
+    }
+    //see if they have a card from chance
+    else if(playerList[turnCounter].jail > 0 && playerList[turnCounter].getOutCard == 2) {
+        generalChannel.send("Using your Get out of Jail Free Card!");
+        chanceDiscard.push(getOutOfJailChance[0]);
+        getOutOfJailChance = null;
+        playerList[turnCounter].getOutCard = 0;
+    }
+    //see if they have a card from both, if  so put community back first
+    else if(playerList[turnCounter].jail > 0 && playerList[turnCounter].getOutCard == 3) {
+        generalChannel.send("Using your Get out of Jail Free Card!");
+        comDiscard.push(getOutOfJailCom[0]);
+        getOutOfJailCom = null;
+        playerList[turnCounter].getOutCard = 2;
     }
     else {
         generalChannel.send("You are not currently in jail!");
@@ -1137,7 +1163,7 @@ function drawCard(deckNum) {
             case '5': //get out of jail free card, needs to removed from the list and saved until used
                 generalChannel.send(card[1]);
                 playerList[turnCounter].getOutCard += 1;
-                getOutOfJail.push(comDraw[0]);
+                getOutOfJailCom.push(comDraw[0]);
                 break;
             case '6':
                 generalChannel.send(card[1]);
@@ -1288,7 +1314,7 @@ function drawCard(deckNum) {
             case '7':
                 generalChannel.send(card[1]); //get out of jail card
                 playerList[turnCounter].getOutCard += 1;
-                getOutOfJail.push(chanceDraw[0]);
+                getOutOfJailChance.push(chanceDraw[0]);
                 break;
             case '8':
                 generalChannel.send(card[1]);
