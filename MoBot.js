@@ -1,3 +1,16 @@
+/* 
+* Discord Monopoly Bot: 1/5/19 
+* By Ian Wasson & John Bernards
+* 
+* This is intented to be a Discord Bot that allows users 
+* to play a game of Monopoly. This game is in no way endorsed by 
+* nor supported by Hasbro Games. It is intended as a parody game
+* and for personal educational purposes only. 
+*/
+
+
+
+
 const Discord = require('discord.js')           //js library with commands for discord
 const auth = require('./auth.json')             //auth tokens for logging into bot
 const client = new Discord.Client()             //create a new discord client for the bot
@@ -72,7 +85,8 @@ var boardCoords = [[RBmiddle, RBmiddle],
 ]
 //when the bot is initialized call the other files
 client.on('ready', () => {
-    generalChannel = client.channels.get("664325321876832258"); //general channel for testing purposes WILL NEED TO NOT HARD CODE
+    //CHANGE THIS TO WHAT CHANNEL YOU WANT TO HAVE THE BOT LISTEN TO
+    generalChannel = client.channels.get("664325321876832258"); //general channel for testing purposes
     console.log("Connected as " + client.user.tag)
     client.user.setActivity("Monopoly")
     var List = require('./CLL.js')
