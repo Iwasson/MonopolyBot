@@ -95,10 +95,10 @@ function processCommand(receivedMessage) {
     let arguments = splitCommand.slice(1)               //sets an array of arguments
 
     //used to check if a user is currently attempting to trade with someone
-    if (tradeFlag == true && turn(playerList, receivedMessage)) {
+    if (proposeFlag == false && tradeFlag == true && turn(playerList, receivedMessage)) {
         switch (primaryCommand) {
             case 'help':
-                generalChannel.send("Type >stop to end trade mode \nType >select <username> to select which player you want to trade with\nType >inspect <username> to find out what another player has\nType >give <money/deeds/Get out of jail card> to add something to give to another player\nType >receive <money/deeds/Get out of jail card> to add something you want from another player\nType >propose to send the offer to the selected player");
+                generalChannel.send("Type >stop to end trade mode \nType >select <username> to select which player you want to trade with\nType >inspect <username> to find out what another player has\nType >give <money/deeds/Get out of jail card> to add something to give to another player\nType >receive <money/deeds/Get out of jail card> to add something you want from another player\nType >propose to send the offer to the selected player\nType >review to see the current trade deal");
                 break;
             case 'stop':
                 generalChannel.send("Exiting Trading mode!");
@@ -154,27 +154,122 @@ function processCommand(receivedMessage) {
                 }
                 break;
             case 'give':
+                var choice = parseInt(arguments[0]); //store the number in int form
+                var optionsTo = myList.getDeeds(playerList[turnCounter].name); //get an array of the options that they can choose from
                 //if no args, print out what you have to offer
-                if (arguments.length == 0) {
-                    generalChannel.send("What would you like to offer?\n");
-                    deedCommand(receivedMessage, null);
-                }
-                break;
-            case 'receive':
                 if (arguments.length == 0) {
                     if (tradeTo == null) {
                         generalChannel.send("Please select a player to trade with first!");
                     }
                     else {
-                        generalChannel.send("What would you like to gain?\n");
-                        deedCommand(receivedMessage, tradeTo.nick.toLowerCase());
+                        generalChannel.send("What would you like to offer?\nMoney You have: $" + playerList[turnCounter].money + "\nDeeds:\n" + optionsTo);
+                    }
+                }
+                //else add what they want give
+                else {
+                    if (arguments[0].toLowerCase() == "money" && !isNaN(arguments[1])) {
+                        moneyTo = parseInt(arguments[1]);
+                        if (moneyTo < 0) {
+                            moneyTo = 0;
+                            generalChannel.send("You can't give negative money!");
+                        }
+                        else {
+                            generalChannel.send("You have added $" + moneyTo + " to give.");
+                        }
+                    }
+                    else if (!isNaN(arguments[0])) {
+                        if (choice > optionsTo.length) {
+                            generalChannel.send("Thats not a valid option.");
+                        }
+                        else {
+                            var tempOption = optionsTo[choice - 1].toString().split(") ");
+                            deedsTo.push(myList.getDeed(tempOption[1]));
+                            generalChannel.send("You have added " + tempOption[1] + " to give.");
+                        }
+                    }
+                }
+                break;
+            case 'receive':
+                var choice = parseInt(arguments[0]); //store the number in int form
+                if (arguments.length == 0) {
+                    if (tradeTo == null) {
+                        generalChannel.send("Please select a player to trade with first!");
+                    }
+                    else {
+                        var optionsFrom = myList.getDeeds(tradeTo.name);
+                        generalChannel.send("What would you like to gain?\nMoney They have: $" + tradeTo.money + "\nDeeds:\n" + optionsFrom);
+                    }
+                }
+                else {
+                    if (arguments[0].toLowerCase() == "money" && !isNaN(arguments[1])) {
+                        moneyFrom = parseInt(arguments[1]);
+                        if (moneyFrom < 0) {
+                            moneyFrom = 0;
+                            generalChannel.send("You can't receive negative money!");
+                        }
+                        generalChannel.send("You have added $" + moneyTo + " to receive.");
+                    }
+                    else if (!isNaN(arguments[0])) {
+                        var optionsFrom = myList.getDeeds(tradeTo.name);
+                        if (choice > optionsFrom.length) {
+                            generalChannel.send("Thats not a valid option.");
+                        }
+                        else {
+                            var tempOption = optionsFrom[choice - 1].toString().split(") ");
+                            deedsFrom.push(myList.getDeed(tempOption[1]));
+                            generalChannel.send("You have added " + tempOption[1] + " to receive.");
+                        }
                     }
                 }
                 break;
             case 'propose':
+                var tempTo = [];
+                deedsTo.forEach(element => {
+                    tempTo.push(element.title)
+                });
+                var tempFrom = [];
+                deedsFrom.forEach(element => {
+                    tempFrom.push(element.title)
+                });
                 generalChannel.send("Commiting proposal to " + tradeTo.name);
-                generalChannel.send("You are offering: \tThey are giving: " + "\n");
+                generalChannel.send("You are offering:\nMoney To: $" + moneyTo + "\nDeeds:\n" + tempTo + "\n============\nThey are giving:\nMoney From: $" + moneyFrom + "\nDeeds:\n" + tempFrom);
+                proposeFlag = true;
+                tradeCommand("send");
                 break;
+            case 'review':
+                var tempTo = [];
+                deedsTo.forEach(element => {
+                    tempTo.push(element.title)
+                });
+                var tempFrom = [];
+                deedsFrom.forEach(element => {
+                    tempFrom.push(element.title)
+                });
+                generalChannel.send("Current offer is: \nYou are offering:\nMoney To: $" + moneyTo + "\nDeeds:\n" + tempTo + "\n============\nThey are giving:\nMoney From: $" + moneyFrom + "\nDeeds:\n" + tempFrom);
+                break;
+            default:
+                generalChannel.send("I don't understand the request.");
+                break;
+        }
+    }
+    else if (tradeFlag == true && proposeFlag == true) {
+        //commands for accepting and rejecting offer
+        if (receivedMessage.author.toString() == tradeTo.name) {
+            switch (primaryCommand) {
+                case 'accept':
+                    tradeCommand("accept");
+                    break;
+                case 'reject':
+                    tradeCommand("reject");
+                    break;
+            }
+        }
+        else if (turn(playerList, receivedMessage) && primaryCommand == "abort") {
+            generalChannel.send("Aborting the trade deal");
+            tradeCommand("reject");
+        }
+        else {
+            generalChannel.send("You are not the person who needs to respond to this trade deal!");
         }
     }
     else {
@@ -298,6 +393,10 @@ function startCommand(arguments) {
     if (arguments[0] == 'override') {
         generalChannel.send("As you wish, starting");
         gameStart = true;
+        return;
+    }
+    if(gameStart == true) {
+        generalChannel.send("A game is already in progress");
         return;
     }
     if (playerList.length < 1) {
@@ -524,6 +623,7 @@ function rollCommand(receivedMessage) {
             generalChannel.send("You've landed on Go to Jail! Go straight to jail!");
             playerList[turnCounter].pos = 10;
             playerList[turnCounter].jail = 3;
+            playerRoll = true;
         }
         //otherwise pay rent to the person who owns this tile
         else {
@@ -1257,8 +1357,50 @@ function drawCard(deckNum) {
 
 //allows a player to trade money and properties back and forth
 //can only be initiated by current turn player
-function tradeCommand() {
+//function commits changes or reverts changes
+function tradeCommand(option) {
+    if (option == "send") {
+        var tempTo = [];
+        var tempFrom = [];
+        deedsTo.forEach(element => {
+            tempTo.push(element.title);
+        });
+        deedsFrom.forEach(element => {
+            tempFrom.push(element.title);
+        });
+        generalChannel.send(tradeTo.name + " you have a trade offer from " + playerList[turnCounter].name + "\n(player who sent the deal can type >abort to cancel the deal)");
+        generalChannel.send("They would like to give you: \nMoney: $" + moneyTo + "\nDeeds: " + tempTo + "\n============\nThey want from you: \nMoney: $" + moneyFrom + "\nDeeds: " + tempFrom + "\n\nWould you like to accept (>accept) this offer or reject (>reject) this offer?");
+        return;
+    }
+    //distribute all of the right stuff to the right players
+    else if (option == "accept") {
+        generalChannel.send("You have accepted the deal!");
+        //give any money offered
+        playerList[turnCounter] -= moneyTo;
+        playerList[turnCounter] += moneyFrom;
 
+        //assign the new owners of the properties
+        deedsTo.forEach(element => {
+            element.owner = tradeTo.name;
+        });
+
+        deedsFrom.forEach(element => {
+            element.owner = playerList[turnCounter].name;
+        });
+    }
+    //if they rejected the trade deal, then notify
+    else if (option == "reject") {
+        generalChannel.send("You have rejected the deal!");
+    }
+    //regardless of decision, reset all flags and temp objects
+    tradeFlag = false;
+    proposeFlag = false;
+
+    moneyTo = 0;
+    moneyFrom = 0;
+
+    deedsTo = null;
+    deedsFrom = null;
 }
 
 function bankrupt() {
