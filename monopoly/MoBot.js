@@ -10,19 +10,11 @@
 Restarting work 6/1/23
 */
 
-
-
-
-const Discord = require('discord.js')           //js library with commands for discord
-const auth = require('./auth.json')             //auth tokens for logging into bot
-const client = new Discord.Client()             //create a new discord client for the bot
-
-const Canvas = require('canvas')                //used to draw on images
-const { createCanvas, loadImage } = require('canvas')   //dont know what this does
+const { Canvas, createCanvas, loadImage } = require('canvas');   //dont know what this does
 
 var player;                                     //define struct
 var playerList = []                             //hold the players for game
-var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available for use 
+var pieces = ["car", "hat", "shoe", "thimble"]  //Pieces available forA use 
 var comDraw = [];                               //stores the draw pile of community chest cards
 var comDiscard = [];                            //stores the discard pile of community chest cards
 var chanceDraw = [];                            //stores the draw pile of chance cards
@@ -85,23 +77,7 @@ var boardCoords = [[RBmiddle, RBmiddle],
 [RBmiddle + 50, 300 + (middleLen * 7)],
 [RBmiddle + 50, 300 + (middleLen * 8)],
 ]
-//when the bot is initialized call the other files
-client.on('ready', () => {
-    //CHANGE THIS TO WHAT CHANNEL YOU WANT TO HAVE THE BOT LISTEN TO
-    generalChannel = client.channels.get("664325321876832258"); //general channel for testing purposes
-    console.log("Connected as " + client.user.tag)
-    client.user.setActivity("Monopoly")
-    var List = require('./CLL.js')
-    myList = new List;
-    myList.loadDefault(); //will always load the default game
-    loadCards();
-})
 
-//Listens for commands from the user
-client.on('message', (receivedMessage) => {
-    if (receivedMessage.author == client.user) { return }
-    if (receivedMessage.content.startsWith(">")) { processCommand(receivedMessage) }
-})
 
 //further parses the command that was given to determine which function needs to be called
 function processCommand(receivedMessage) {
@@ -1457,5 +1433,3 @@ function bankrupt() {
     }
     return 0;
 }
-//logs bot into the server
-client.login(auth.token)
