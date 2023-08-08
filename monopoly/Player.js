@@ -59,7 +59,7 @@ class Player {
     );
   }
 
-  roll(receivedMessage) {
+  roll() {
     if (this.playerRoll == true) {
       return 'You have already rolled!';
     }
@@ -503,7 +503,7 @@ class Player {
     }
   }
 
-  bailCommand(receivedMessage) {
+  bailCommand() {
     if (this.jail > 0 && this.getOutCard == 0) {
       this.money -= 50;
       return 'You have paid your bail! -$50';
