@@ -22,6 +22,7 @@ class Player {
     this.jail = jail;
     this.number = number;
     this.playerRoll = false; // TODO - Does this need to stored within the class?
+    this.doubleCounter = 0; // TODO - Does this need to stored within the class?
   }
 
   poke() {
@@ -36,30 +37,19 @@ class Player {
     }
     switch (prompts[0]) {
       case 'bail':
-        generalChannel.send('Buy your way out of jail... you filthy animal ;)');
-        break;
+        return 'Buy your way out of jail... you filthy animal ;)';
       case 'init':
-        generalChannel.send(
-          'Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car '
-        );
-        break;
+        return 'Initializes the bot for a new game of Monopoly! Include your choice of piece Ex: >intit car ';
       case 'start':
-        generalChannel.send('Starts a new game of Monopoly!');
-        break;
+        return 'Starts a new game of Monopoly!';
       case 'roll':
-        generalChannel.send('Roll your two die');
-        break;
+        return 'Roll your two die';
       case 'save':
-        generalChannel.send('Saves the current state of the game');
-        break;
+        return 'Saves the current state of the game';
       case 'load':
-        generalChannel.send('Loads a saved game');
-        break;
+        return 'Loads a saved game';
       default:
-        generalChannel.send(
-          'List of Commands: \nBail\tBuy\nDebug\tDeeds\nTrade\tEnd\nHelp\tImg\nInit\tInspect\nLoad\tMortgage\nPoke\tReroll\nRoll\tSave\nSell\tStart\nStop\tUnmortgage'
-        );
-        break;
+        return 'List of Commands: \nBail\tBuy\nDebug\tDeeds\nTrade\tEnd\nHelp\tImg\nInit\tInspect\nLoad\tMortgage\nPoke\tReroll\nRoll\tSave\nSell\tStart\nStop\tUnmortgage';
     }
   }
 
@@ -71,11 +61,10 @@ class Player {
 
   roll(receivedMessage) {
     if (this.playerRoll == true) {
-      generalChannel.send('You have already rolled!');
-      return;
+      return 'You have already rolled!';
     }
 
-    generalChannel.send('You roll the die...');
+    var response = 'You roll the die...\n';
 
     //two die are rolled to better skew the odds of rolling some numbers
     //over others. Two die have a greater chance to roll 7 than a number generator
@@ -85,29 +74,32 @@ class Player {
     var result = die1 + die2;
 
     if (die1 == die2) {
-      generalChannel.send(
+      response +=
         'You Rolled: ' +
-          die1 +
-          ' & ' +
-          die2 +
-          '\nfor a total of: ' +
-          result +
-          '\nDoubles!'
-      );
-      ++doubleCounter;
+        die1 +
+        ' & ' +
+        die2 +
+        '\nfor a total of: ' +
+        result +
+        '\nDoubles!\n';
+      this.doubleCounter = this.doubleCounter + 1;
       if (this.jail > 0) {
         this.jail = 0;
       }
     } else {
-      generalChannel.send(
-        'You Rolled: ' + die1 + ' & ' + die2 + '\nfor a total of: ' + result
-      );
+      response +=
+        'You Rolled: ' +
+        die1 +
+        ' & ' +
+        die2 +
+        '\nfor a total of: ' +
+        result +
+        '\n';
       this.playerRoll = true;
     }
-    if (doubleCounter > 2) {
-      generalChannel.send(
-        'Doubles three times in a row!? Clearly you must be cheating! To jail with you!'
-      );
+    if (this.doubleCounter > 2) {
+      response +=
+        'Doubles three times in a row!? Clearly you must be cheating! To jail with you!\n';
       this.playerRoll = true;
       this.pos = 10;
       this.jail = 3;
@@ -116,13 +108,12 @@ class Player {
     //if the player is in jail, then they need to not move and decrement counter by 1
     else if (this.jail > 0) {
       if (this.jail == 1) {
-        generalChannel.send(
-          "You've been in jail for 3 turns! You must pay $50 to get out!"
-        );
+        response +=
+          "You've been in jail for 3 turns! You must pay $50 to get out!\n";
         this.money -= 50;
         this.pos += result;
       } else {
-        generalChannel.send('You sit in jail for another turn!');
+        response += 'You sit in jail for another turn!\n';
         this.jail -= 1;
       }
     } else {
@@ -131,7 +122,7 @@ class Player {
 
       //check if they have passed go, give $200
       if (this.pos > 39) {
-        generalChannel.send('You have passed GO! Get $200!');
+        response += 'You have passed GO! Get $200!\n';
         this.pos = this.pos % 40;
         this.money += 200;
       }
@@ -147,7 +138,7 @@ class Player {
           //see if owned
           if (myList.getTitle(this.pos).owner == 'null') {
             //if unowned then notify they can buy it
-            generalChannel.send('This utility is unowned, you could buy it!');
+            response += 'This utility is unowned, you could buy it!\n';
           }
           //otherwise this tile is owned and you need to pay a specific amount
           else {
@@ -162,21 +153,20 @@ class Player {
                 element.money += tempResult;
               }
             });
-            generalChannel.send(
+            response +=
               'You roll two die and get: ' +
-                (die3 + die4) +
-                '\nSo you have to pay ' +
-                tempResult +
-                ' to ' +
-                myList.getTitle(this.pos).owner
-            );
+              (die3 + die4) +
+              '\nSo you have to pay ' +
+              tempResult +
+              ' to ' +
+              myList.getTitle(this.pos).owner;
           }
         }
         //check if they advanced to nearest railroad
         if (check == 2) {
           //if unowned then notify they can buy it
           if (myList.getTitle(this.pos).owner == 'null') {
-            generalChannel.send('This railroad is unowned, you could buy it!');
+            response += 'This railroad is unowned, you could buy it!\n';
           }
           //otherwise pay double the rent
           else {
@@ -187,19 +177,17 @@ class Player {
       }
       //income tax
       else if (this.pos == 4) {
-        generalChannel.send("You've landed on income tax! Pay $200!");
+        response += "You've landed on income tax! Pay $200!\n";
         this.money -= 200;
       }
       //luxury tax
       else if (this.pos == 38) {
-        generalChannel.send("You've landed on luxury tax! Pay $100!");
+        response += "You've landed on luxury tax! Pay $100!\n";
         this.money -= 100;
       }
       //go to jail
       else if (this.pos == 30) {
-        generalChannel.send(
-          "You've landed on Go to Jail! Go straight to jail!"
-        );
+        response += "You've landed on Go to Jail! Go straight to jail!\n";
         this.pos = 10;
         this.jail = 3;
         this.playerRoll = true;
@@ -216,16 +204,16 @@ class Player {
               element.money += totalRent;
             }
           });
-          generalChannel.send(
+          response +=
             'You pay ' +
-              tempDeed.owner +
-              ' $' +
-              totalRent +
-              ' for staying at their property'
-          );
+            tempDeed.owner +
+            ' $' +
+            totalRent +
+            ' for staying at their property\n';
         }
       }
     }
+    return response;
   }
 
   //generates a random number between 1 and 7
@@ -237,9 +225,8 @@ class Player {
 
   inspectCommand() {
     tempTile = myList.getTitle(this.pos);
-    generalChannel.send(
-      'You have $' + this.money + '\nYou are on: ' + tempTile.title
-    );
+    var response =
+      'You have $' + this.money + '\nYou are on: ' + tempTile.title + '\n';
 
     ownable =
       this.pos != 40 &&
@@ -258,39 +245,38 @@ class Player {
 
     //only list info for player ownable tiles
     if (tempTile.owner == 'null' && ownable) {
-      generalChannel.send(
-        'This plot is unowned! \nYou can buy it for: $' + tempTile.price
-      );
+      response +=
+        'This plot is unowned! \nYou can buy it for: $' + tempTile.price + '\n';
     } else if (ownable && tempTile.mortgaged == false) {
-      generalChannel.send(
+      response +=
         'This plot is owned by: ' +
-          tempTile.owner +
-          '\nThere are ' +
-          tempTile.houses +
-          ' houses on this plot.'
-      );
+        tempTile.owner +
+        '\nThere are ' +
+        tempTile.houses +
+        ' houses on this plot.';
       if (tempTile.houses > 0) {
         if (tempTile.houses == 1) {
-          generalChannel.send('The rent is: $' + tempTile.rent1);
+          response += 'The rent is: $' + tempTile.rent1;
         }
         if (tempTile.houses == 2) {
-          generalChannel.send('The rent is: $' + tempTile.rent2);
+          response += 'The rent is: $' + tempTile.rent2;
         }
         if (tempTile.houses == 3) {
-          generalChannel.send('The rent is: $' + tempTile.rent3);
+          response += 'The rent is: $' + tempTile.rent3;
         }
         if (tempTile.houses == 4) {
-          generalChannel.send('The rent is: $' + tempTile.rent4);
+          response += 'The rent is: $' + tempTile.rent4;
         }
         if (tempTile.houses == 5) {
-          generalChannel.send('The rent is: $' + tempTile.rentH);
+          response += 'The rent is: $' + tempTile.rentH;
         }
       } else {
-        generalChannel.send('The rent is: $' + tempTile.rent);
+        response += 'The rent is: $' + tempTile.rent;
       }
     } else if (tempTile.mortgaged == true) {
-      generalChannel.send('This tile is mortgaged!');
+      response += 'This tile is mortgaged!';
     }
+    return response;
   }
 
   //allows a user to sell a house that they have built on a property
@@ -299,14 +285,12 @@ class Player {
     //get user input
     if (prompts.length == 0) {
       if (myList.getDeeds(this.name) == '') {
-        generalChannel.send("You don't have any properties to sell houses on!");
-        return;
+        return "You don't have any properties to sell houses on!";
       } else {
-        generalChannel.send(
+        return (
           'Which property would you like to sell a house on? (ex. >sell 1) \n' +
-            myList.getDeeds(this.name)
+          myList.getDeeds(this.name)
         );
-        return;
       }
     }
     if (!isNaN(prompts[0])) {
@@ -314,50 +298,41 @@ class Player {
       var options = myList.getDeeds(this.name);
 
       if (choice > options.length) {
-        generalChannel.send('Thats not a valid option.');
+        return 'Thats not a valid option.';
       } else {
         var property = options[choice - 1].toString().split(' ');
         var seller = myList.getDeed(property[1]);
 
         //check to see if there are even any houses to sell
         if (seller.houses < 0) {
-          generalChannel.send(
-            "There aren't any houses on that property to sell!"
-          );
-          return;
+          return "There aren't any houses on that property to sell!";
         }
 
         //check to see if selling one house upsets the balance
         if (myList.sellHome(deedName)) {
           this.money += seller.priceH / 2;
-          generalChannel.send(
+          return (
             'You have sold one house on ' +
-              seller.title +
-              ' for $' +
-              seller.priceH / 2
+            seller.title +
+            ' for $' +
+            seller.priceH / 2
           );
-          return;
         } else {
-          generalChannel.send(
+          return (
             'You could not sell a house on ' +
-              seller.title +
-              '\nMaybe try selling your other houses in that group first...'
+            seller.title +
+            '\nMaybe try selling your other houses in that group first...'
           );
-          return;
         }
       }
-    } else {
-      generalChannel.send("I don't understand the request...\nTry >sell 1");
     }
+    return "I don't understand the request...\nTry >sell 1";
   }
 
   //allows a user to buy either a deed or a house on a deed they own
   buyCommand(prompts) {
     if (prompts.length == 0) {
-      generalChannel.send(
-        'What would you like to buy? (Buy deed) or (Buy house)'
-      );
-      return;
+      return 'What would you like to buy? (Buy deed) or (Buy house)';
     }
     tempTile = myList.getTitle(this.pos);
 
@@ -366,15 +341,12 @@ class Player {
       //will need to check to see if the houses are being built correctly
       //check to see if the player has any deeds
       if (myList.getDeeds(this.name) == '') {
-        generalChannel.send(
-          "You don't have any properties to build houses on!"
-        );
-        return;
+        return "You don't have any properties to build houses on!";
       }
       if (prompts[0] == null) {
-        generalChannel.send(
+        return (
           'Which property would you like to build a house on? (ex. >buy house 1) \n' +
-            myList.getDeeds(this.name)
+          myList.getDeeds(this.name)
         );
       }
       //if they send in a second argument
@@ -386,7 +358,7 @@ class Player {
 
           //check to see if the option they provided is greater than the possible options
           if (choice > options.length) {
-            generalChannel.send('Thats not a valid option.');
+            return 'Thats not a valid option.';
           }
           //choice is valid, so see if they have all of the properties in that group
           else {
@@ -397,69 +369,49 @@ class Player {
             //cll will take care of that
             if (myList.hasGroup(property[1], this.name)) {
               if (myList.getTitle(this.pos).priceH > this.money) {
-                generalChannel.send(
-                  "You can't afford to buy a house on that property!"
-                );
+                return "You can't afford to buy a house on that property!";
                 return;
               } else {
                 if (myList.getDeed[property[1]].houses == 5) {
-                  generalChannel.send(
-                    "You already have a hotel on that property, you can't buy any more houses!"
-                  );
-                  return;
+                  return "You already have a hotel on that property, you can't buy any more houses!";
                 }
                 if (myList.groupMortgaged(property[1]) == false) {
                   myList.buyHome(property[1]);
-                  generalChannel.send(
+                  return (
                     'You have bought a house on ' +
-                      property[1] +
-                      ' for $' +
-                      myList.getTitle(this.pos).priceH
+                    property[1] +
+                    ' for $' +
+                    myList.getTitle(this.pos).priceH
                   );
-                  return;
                 } else {
-                  generalChannel.send(
-                    "You can't buy a house while one of your properties is mortgaged!"
-                  );
-                  return;
+                  return "You can't buy a house while one of your properties is mortgaged!";
                 }
               }
             } else {
-              generalChannel.send(
-                "You can't build a house until you own all of the deeds in that group!"
-              );
-              return;
+              return "You can't build a house until you own all of the deeds in that group!";
             }
           }
         } else {
-          generalChannel.send(
-            "I don't understand the request...\nTry >buy house 1"
-          );
-          return;
+          return "I don't understand the request...\nTry >buy house 1";
         }
       }
     } else if (prompts[0].toLowerCase() == 'deed') {
       //check to see if they already own the tile
       if (tempTile.owner == this.name) {
-        generalChannel.send('You already own this tile!');
+        return 'You already own this tile!';
       } else if (tempTile.owner != 'null') {
-        generalChannel.send('Someone else already owns this tile!');
+        return 'Someone else already owns this tile!';
       } else {
         if (this.money < tempTile.price) {
-          generalChannel.send("You don't have enough money to buy that!");
+          return "You don't have enough money to buy that!";
         } else {
           this.money -= tempTile.price;
           myList.setOwner(this.pos, this.name);
-          generalChannel.send(
-            'You have bought ' + tempTile.title + ' for ' + tempTile.price
-          );
+          return 'You have bought ' + tempTile.title + ' for ' + tempTile.price;
         }
       }
-    } else {
-      generalChannel.send(
-        'I can\'t understand the request, try "Buy Deed" or "Buy House"'
-      );
     }
+    return 'I can\'t understand the request, try "Buy Deed" or "Buy House"';
   }
 
   //allows you to mortgage a deed if and only if no houses are built on it,
@@ -472,14 +424,12 @@ class Player {
 
     if (prompts.length == 0) {
       if (myList.getDeeds(this.name) == '') {
-        generalChannel.send("You don't have any properties to mortgage!");
-        return;
+        return "You don't have any properties to mortgage!";
       } else {
-        generalChannel.send(
+        return (
           'What property would you like to mortgage?\n' +
-            myList.getDeeds(this.name)
+          myList.getDeeds(this.name)
         );
-        return;
       }
     } else {
       if (!isNaN(prompts[0])) {
@@ -488,37 +438,29 @@ class Player {
 
         //check to see if the option they provided is greater than the possible options
         if (choice > options.length) {
-          generalChannel.send('Thats not a valid option.');
+          return 'Thats not a valid option.';
         } else {
           var property = options[choice - 1].toString().split(') ');
 
           //check to see if any houses are built on that group
           if (myList.getHouseCount(property[1]) != 0) {
-            generalChannel.send(
-              "You can't mortgage a property if it has houses on it, try selling them first!"
-            );
-            return;
+            return "You can't mortgage a property if it has houses on it, try selling them first!";
           }
           //if not then mortgage the property, flip the flag and pay the user
           else {
             this.money += parseInt(myList.getDeed(property[1]).mortgage);
             myList.mortgage(property[1]);
-            generalChannel.send(
+            return (
               'You have mortgaged ' +
-                property[1] +
-                ' for $' +
-                myList.getDeed(property[1]).mortgage
+              property[1] +
+              ' for $' +
+              myList.getDeed(property[1]).mortgage
             );
-            return;
           }
         }
-      } else {
-        generalChannel.send(
-          "I don't understand the request...\nTry >mortgage 1"
-        );
-        return;
       }
     }
+    return "I don't understand the request...\nTry >mortgage 1";
   }
 
   //lets you pay to unmortgage a property
@@ -526,14 +468,12 @@ class Player {
   unmortgageCommand(prompts) {
     if (prompts.length == 0) {
       if (myList.getDeeds(this.name) == '') {
-        generalChannel.send("You don't have any properties to unmortgage!");
-        return;
+        return "You don't have any properties to unmortgage!";
       } else {
-        generalChannel.send(
+        return (
           'What property would you like to unmortgage?\n' +
-            myList.getMortgagedDeeds(this.name)
+          myList.getMortgagedDeeds(this.name)
         );
-        return;
       }
     } else {
       if (!isNaN(prompts[0])) {
@@ -542,7 +482,7 @@ class Player {
 
         //check to see if the option they provided is greater than the possible options
         if (choice > options.length) {
-          generalChannel.send('Thats not a valid option.');
+          return 'Thats not a valid option.';
         } else {
           var property = options[choice - 1].toString().split(') ');
           var uMorPrice =
@@ -550,62 +490,55 @@ class Player {
             parseInt(myList.getDeed(property[1]).mortgage * 0.1);
 
           if (uMorPrice > this.money) {
-            generalChannel.send(
-              "You can't afford to Unmortgage that property!"
-            );
-            return;
+            return "You can't afford to Unmortgage that property!";
           } else {
             this.money -= uMorPrice;
             myList.unmortgage(property[1]);
-            generalChannel.send('You have unmortgaged that property!');
+            return 'You have unmortgaged that property!';
           }
         }
       } else {
-        generalChannel.send(
-          "I don't understand the request...\nTry >unmortgage 1"
-        );
-        return;
+        return "I don't understand the request...\nTry >unmortgage 1";
       }
     }
   }
 
   bailCommand(receivedMessage) {
     if (this.jail > 0 && this.getOutCard == 0) {
-      generalChannel.send('You have paid your bail! -$50');
       this.money -= 50;
+      return 'You have paid your bail! -$50';
     }
     //see if they have a card from community chest
     else if (this.jail > 0 && this.getOutCard == 1) {
-      generalChannel.send('Using your Get out of Jail Free Card!');
       comDiscard.push(getOutOfJailCom[0]);
       getOutOfJailCom = null;
       this.getOutCard = 0;
+      return 'Using your Get out of Jail Free Card!';
     }
     //see if they have a card from chance
     else if (this.jail > 0 && this.getOutCard == 2) {
-      generalChannel.send('Using your Get out of Jail Free Card!');
       chanceDiscard.push(getOutOfJailChance[0]);
       getOutOfJailChance = null;
       this.getOutCard = 0;
+      return 'Using your Get out of Jail Free Card!';
     }
     //see if they have a card from both, if  so put community back first
     else if (this.jail > 0 && this.getOutCard == 3) {
-      generalChannel.send('Using your Get out of Jail Free Card!');
       comDiscard.push(getOutOfJailCom[0]);
       getOutOfJailCom = null;
       this.getOutCard = 2;
-    } else {
-      generalChannel.send('You are not currently in jail!');
+      return 'Using your Get out of Jail Free Card!';
     }
+    return 'You are not currently in jail!';
   }
 
   deedCommand(receivedMessage, player) {
     if (player == null) {
       var tempDeeds = myList.getDeeds(receivedMessage.author.toString());
       if (tempDeeds == null) {
-        generalChannel.send('You have no deeds!');
+        return 'You have no deeds!';
       } else {
-        generalChannel.send(tempDeeds);
+        return tempDeeds;
       }
     } else if (player != null) {
       var tempDeeds;
@@ -615,76 +548,67 @@ class Player {
         }
       });
       if (tempDeeds == null) {
-        generalChannel.send('They have no deeds!');
+        return 'They have no deeds!';
       } else {
-        generalChannel.send(tempDeeds);
+        return tempDeeds;
       }
-    } else {
-      generalChannel.send('Not a valid Request...');
     }
+    return 'Not a valid Request...';
   }
 
   //ends a players turn, can be tripped if sent to jail, or manually by the player to advance play
   endTurn() {
     if (this.playerRoll == false) {
-      generalChannel.send("You haven't rolled yet!");
-      return;
+      return "You haven't rolled yet!";
     }
     var con = bankrupt();
     if (con == -1) {
       if (playerList.length < 2) {
-        generalChannel.send(
-          'Congrats ' + this.name + '! You are the winner of Monopoly'
-        );
+        return 'Congrats ' + this.name + '! You are the winner of Monopoly';
         //end le game
       } else {
         if (turnCounter == playerList.length - 1) {
           playerList = playerList.filter((e) => e !== this);
-          generalChannel.send('Ending your turn...');
           ++turnCounter; //advance the turn counter by 1
           this.playerRoll = false; //resets the flag for players rolling
-          doubleCounter = 0; //resets how many doubles have been rolled.
+          this.doubleCounter = 0; //resets how many doubles have been rolled.
 
           //should roll back to 0 after the last player has gone, should work regardless of how many players
           if (turnCounter >= playerList.length) {
             turnCounter = 0;
           }
 
-          generalChannel.send(this.name + "'s turn!");
+          return "Ending your turn... It's now " + this.name + "'s turn!";
         } else {
           playerList = playerList.filter((e) => e !== this);
-          generalChannel.send('Ending your turn...');
           this.playerRoll = false; //resets the flag for players rolling
-          doubleCounter = 0; //resets how many doubles have been rolled.
+          this.doubleCounter = 0; //resets how many doubles have been rolled.
 
           //should roll back to 0 after the last player has gone, should work regardless of how many players
           if (turnCounter == playerList.length) {
             turnCounter = 0;
           }
 
-          generalChannel.send(this.name + "'s turn!");
+          return "Ending your turn... It's now " + this.name + "'s turn!";
         }
       }
     }
     if (con == 0) {
-      generalChannel.send('Ending your turn...');
       ++turnCounter; //advance the turn counter by 1
       this.playerRoll = false; //resets the flag for players rolling
-      doubleCounter = 0; //resets how many doubles have been rolled.
+      this.doubleCounter = 0; //resets how many doubles have been rolled.
 
       //should roll back to 0 after the last player has gone, should work regardless of how many players
       if (turnCounter == playerList.length) {
         turnCounter = 0;
       }
 
-      generalChannel.send(this.name + "'s turn!");
+      return "Ending your turn... It's now " + this.name + "'s turn!";
     }
     if (con == 1) {
-      generalChannel.send(
-        'You do not have enough money to end your turn, try selling something first!'
-      );
-      return;
+      return 'You do not have enough money to end your turn, try selling something first!';
     }
+    return 'Not a valid Request...';
   }
 }
 
