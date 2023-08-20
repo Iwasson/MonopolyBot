@@ -2,9 +2,9 @@ name: Deploy Commands
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   Deploy-Commands:
@@ -26,4 +26,4 @@ jobs:
              }" \
              > auth.json
       - run: npm i
-      - run: node ./discord_api/deploy-commands.js
+      - run: node ./discord_api/deployCommands.js

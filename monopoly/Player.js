@@ -1,4 +1,4 @@
-class Player {
+module.exports = class Player {
   constructor(playerID, name, piece) {
     this.playerID = playerID;
     this.name = name;
