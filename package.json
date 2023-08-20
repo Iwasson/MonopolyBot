@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "canvas": "^2.11.2",
+    "@napi-rs/canvas": "^0.1.43",
     "discord.js": "^14.12.1"
   }
 }
