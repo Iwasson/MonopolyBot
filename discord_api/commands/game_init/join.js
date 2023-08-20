@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
+const Player = require("../../../monopoly/Player.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,8 +14,8 @@ module.exports = {
   async execute(interaction, players, availablePieces) {
     let chosenPiece = interaction.options.getString('piece');
 
-    if (chosenPiece in availablePieces) {
-      let newPlayer = Player(
+    if (availablePieces.includes(chosenPiece)) {
+      let newPlayer = new Player(
         interaction.user.id,
         interaction.user.globalName,
         chosenPiece
@@ -28,9 +29,9 @@ module.exports = {
       );
     } else {
       let replyString = `
-                That piece is not available.\n
-                Here are the available pieces:\n
-                ${availablePieces.to_string}
+That piece is not available.\n
+Here are the available pieces:\n
+${availablePieces.join("\n")}
             `;
       await interaction.reply(replyString);
     }

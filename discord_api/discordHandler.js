@@ -3,7 +3,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const availablePieces = ['thimble', 'shoe', 'hat', 'car'];
-const gameStart = false;
+let gameStart = false;
+const game = "test";
+const players = [];
+
 
 const client = new Client({
   intents: [
@@ -18,10 +21,9 @@ client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
-//const players = [];
 //const board = Board(players);
 //const game = Monopoly(players);
-const game = "test";
+
 
 for (const folder of commandFolders) {
   const commandsPath = path.join(foldersPath, folder);
@@ -50,20 +52,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);
-  //console.log(command);
-	console.log(interaction.user);
-
   if (!command) {
     console.error(`No command matching ${interaction.commandName} was found.`);
     return;
   }
 
   try {
+		console.log(`Game start: ${gameStart}`);
     if (!gameStart) {
-      if (command.name == 'start') {
-        await command.execute(interaction, players, gameStart);
+      if (command.data.name == 'start') {
+        gameStart = await command.execute(interaction, players, gameStart);
       }
-      if (command.name == 'join') {
+      if (command.data.name == 'join') {
         await command.execute(interaction, players, availablePieces);
       }
     } else {
