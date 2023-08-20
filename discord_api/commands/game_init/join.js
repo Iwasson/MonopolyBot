@@ -5,7 +5,10 @@ module.exports = {
     .setName('join')
     .setDescription('Join Monopoly Game!')
     .addStringOption((option) =>
-      option.setName('piece').setDescription('Choose your monopoly piece:')
+      option
+        .setName('piece')
+        .setDescription('Choose your monopoly piece:')
+        .setRequired(true)
     ),
   async execute(interaction, players, availablePieces) {
     let chosenPiece = interaction.options.getString('piece');
