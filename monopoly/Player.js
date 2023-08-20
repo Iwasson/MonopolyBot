@@ -1,42 +1,12 @@
 class Player {
-  constructor(
-    playerID,
-    name,
-    nick,
-    money,
-    property,
-    piece,
-    pos,
-    getOutCard,
-    jail,
-    number,
-    moveType,
-    moveTo,
-    collect,
-    buyable,
-    payMultiplier,
-    houseRepairCost,
-    hotelRepairCost
-  ) {
+  constructor(playerID, name, piece) {
     this.playerID = playerID;
     this.name = name;
-    this.nick = nick;
-    this.money = money;
-    this.property = property;
+    this.money = 1500;
     this.piece = piece;
-    this.pos = pos;
-    this.getOutCard = getOutCard;
-    this.jail = jail;
-    this.number = number;
-    this.playerRoll = false;
+    this.pos = 0;
+    this.jail = false;
     this.doubleCounter = 0;
-    this.moveType = moveType;
-    this.moveTo = moveTo;
-    this.collect = collect;
-    this.buyable = buyable;
-    this.payMultiplier = payMultiplier;
-    this.houseRepairCost = houseRepairCost;
-    this.hotelRepairCost = hotelRepairCost;
   }
 
   ProcessCard(card) {
